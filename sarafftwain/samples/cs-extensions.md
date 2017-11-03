@@ -5,15 +5,15 @@ title: Saraff.Twain.NET
 # Saraff.Twain.NET Extensions Samples (LINQ to TWAIN)
 Download [Saraff.Twain.Extensions.zip](https://goo.gl/7KJS6h) Simple, Advanced and Console samples
 
-![]({% link sarafftwain/sample/images/cs1.jpg %})
+![]({% link sarafftwain/samples/images/cs1.jpg %})
 
 **Figure 1 - Saraff.Twain.Sample1 on Windows 10**
 
-![]({% link sarafftwain/sample/images/cs2.jpg %})
+![]({% link sarafftwain/samples/images/cs2.jpg %})
 
 **Figure 2 - Saraff.Twain.Sample2 on Windows 7**
 
-![]({% link sarafftwain/sample/images/cs3.jpg %})
+![]({% link sarafftwain/samples/images/cs3.jpg %})
 
 **Figure 3 - Saraff.Twain.Sample3 on Windows 10**
 
