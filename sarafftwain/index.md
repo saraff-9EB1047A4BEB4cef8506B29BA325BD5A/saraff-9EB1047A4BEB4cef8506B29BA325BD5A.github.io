@@ -29,31 +29,28 @@ Saraff.Twain.NET is the skillful scanning component which allows you to control 
 ## Supported platforms:
 * Windows 2000 / XP / 2003 / Vista / 2008 / 7 / 8 / 10, 32-bit / 64-bit
 * Linux (was tested on Lubuntu 14.04 LTS x86_32 & Lubuntu 16.04 LTS x86_32)
+* MaxOSX (not tested yet)
 
-[NuGet package](https://www.nuget.org/packages/Saraff.Twain/) is available.
+## [NuGet package](https://www.nuget.org/packages/Saraff.Twain/)
+## [Documentation](./wiki/index.md)
 
 ##  Samples:
-* Saraff.Twain.NET CS Samples  cs **(UPDATED. 04.06.2016)**[...](https://goo.gl/info/42Y0gh)
+* [Saraff.Twain.NET CS Samples]({% link sarafftwain/samples/cs.md %}) **(UPDATED. 04.06.2016)**[...](https://goo.gl/info/42Y0gh)
 * [Saraff.Twain.NET Extensions Samples (LINQ to TWAIN)]({% link sarafftwain/samples/cs-extensions.md %}) **(NEW. 29.06.2017)**[...](https://goo.gl/info/7KJS6h)
-* Saraff.Twain.NET Vb.net Samples  vb **(UPDATED. 05.06.2016)**[...](https://goo.gl/info/V8vX10)
-* Saraff.Twain.NET WPF Samples  wpf **(UPDATED. 22.10.2016)**[...](https://goo.gl/info/sP3vL1)
-* Saraff.Twain.NET Multithreading Samples  threading **(NEW. 04.12.2016)**[...](https://goo.gl/info/kqywGn)
-* Saraff.Twain.NET Outproc Samples  outproc **(UPDATED. 22.10.2016)**[...](https://goo.gl/info/tBmvjF)
-* Saraff.Twain.NET Service Samples  service **(UPDATED. 05.05.2017)**[...](https://goo.gl/info/OOcy6H)
-* Saraff.Twain.NET Web Samples  web **(UPDATED. 05.06.2016)**[...](https://goo.gl/info/eQk54c)
-* Saraff.Twain.NET Silverlight Samples  silverlight **(UPDATED. 05.05.2017)**[...](https://goo.gl/info/zIlqqy)
-* Saraff.Twain.NET UWP Samples (Universal Windows)  uwp **(UPDATED. 05.05.2017)**[...](https://goo.gl/info/Ssx4AZ)
-* Saraff.Twain.NET HTML Samples  html **(UPDATED. 05.05.2017)**[...](https://goo.gl/info/EgJ4cY)
-* Saraff.Twain.NET Dependency Injection Samples  di **(NEW. 21.08.2017)**[...](https://goo.gl/info/1iGKug)
+* [Saraff.Twain.NET Vb.net Samples]({% link sarafftwain/samples/vb.md %}) **(UPDATED. 05.06.2016)**[...](https://goo.gl/info/V8vX10)
+* [Saraff.Twain.NET WPF Samples]({% link sarafftwain/samples/wpf.md %}) **(UPDATED. 22.10.2016)**[...](https://goo.gl/info/sP3vL1)
+* [Saraff.Twain.NET Multithreading Samples]({% link sarafftwain/samples/threading.md %}) **(NEW. 04.12.2016)**[...](https://goo.gl/info/kqywGn)
+* [Saraff.Twain.NET Outproc Samples]({% link sarafftwain/samples/outproc.md %}) **(UPDATED. 22.10.2016)**[...](https://goo.gl/info/tBmvjF)
+* [Saraff.Twain.NET Service Samples]({% link sarafftwain/samples/service.md %}) **(UPDATED. 05.05.2017)**[...](https://goo.gl/info/OOcy6H)
+* [Saraff.Twain.NET Web Samples]({% link sarafftwain/samples/web.md %}) **(UPDATED. 05.06.2016)**[...](https://goo.gl/info/eQk54c)
+* [Saraff.Twain.NET Silverlight Samples]({% link sarafftwain/samples/silverlight.md %}) **(UPDATED. 05.05.2017)**[...](https://goo.gl/info/zIlqqy)
+* [Saraff.Twain.NET UWP Samples (Universal Windows)]({% link sarafftwain/samples/uwp.md %}) **(UPDATED. 05.05.2017)**[...](https://goo.gl/info/Ssx4AZ)
+* [Saraff.Twain.NET HTML Samples]({% link sarafftwain/samples/html.md %}) **(UPDATED. 05.05.2017)**[...](https://goo.gl/info/EgJ4cY)
+* [Saraff.Twain.NET Dependency Injection Samples]({% link sarafftwain/samples/di.md %}) **(NEW. 21.08.2017)**[...](https://goo.gl/info/1iGKug)
 
 ![]({% link sarafftwain/content/sample2.jpg%})
 
 **Figure 1 - Saraff.Twain.Sample2 on Windows 7**
-
-# TWAIN Specification 
-Saraff.Twain.NET implements [TWAIN 2.4 Specification](http://www.twain.org/specification/). Explanation of [specification](http://www.twain.org/specification/) is not the purpose of this project. Here will be explained features of the implementation of TWAIN specification.
-
-# Contents
 
 
 _If you notice an error, please let me know about it._
