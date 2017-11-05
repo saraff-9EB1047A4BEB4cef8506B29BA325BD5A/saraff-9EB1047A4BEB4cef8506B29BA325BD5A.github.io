@@ -1,5 +1,5 @@
 # Saraff.Twain.NET CS Samples
-Download [Saraff.Twain.Samples.zip](https://goo.gl/42Y0gh) Simple, Advanced and Console samples
+Download [Saraff.Twain.Samples.zip](https://goo.gl/doYrzd) Simple, Advanced and Console samples
 
 ![]({% link sarafftwain/samples/images/cs1.jpg %})
 

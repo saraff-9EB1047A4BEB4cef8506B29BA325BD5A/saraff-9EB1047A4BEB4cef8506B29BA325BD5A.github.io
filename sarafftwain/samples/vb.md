@@ -1,5 +1,5 @@
 # Saraff.Twain.NET Vb.net Samples
-Download [Saraff.Twain.VbSamples.zip](https://goo.gl/V8vX10) Simple and Advanced Samples
+Download [Saraff.Twain.VbSamples.zip](https://goo.gl/DkedJN) Simple and Advanced Samples
 
 ![]({% link sarafftwain/samples/images/vb1.jpg %})
 
