@@ -34,7 +34,7 @@ Saraff.Twain.NET is the skillful scanning component which allows you to control 
 ## [NuGet package](https://www.nuget.org/packages/Saraff.Twain/)
 ## [Documentation](./wiki/index.md)
 
-## [Samples:](#sarafftwain-samples)
+## [&nbsp;](#samples)Samples:
 * [Saraff.Twain.NET CS Samples]({% link sarafftwain/samples/cs.md %}) **(UPDATED. 04.06.2016)**[...](https://goo.gl/info/doYrzd)
 * [Saraff.Twain.NET Extensions Samples (LINQ to TWAIN)]({% link sarafftwain/samples/cs-extensions.md %}) **(NEW. 29.06.2017)**[...](https://goo.gl/info/nrZ11W)
 * [Saraff.Twain.NET Vb.net Samples]({% link sarafftwain/samples/vb.md %}) **(UPDATED. 05.06.2016)**[...](https://goo.gl/info/DkedJN)
