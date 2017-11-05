@@ -1,4 +1,4 @@
-[All products](../../) / [Saraff.Twain.NET](../)
+[All products](../../) / [Saraff.Twain.NET](../#samples)
 # Saraff.Twain.NET Silverlight Samples
 Download [Saraff.Twain.SilverlightSamples.zip](https://goo.gl/gDh77c) Saraff.Twain.SilverlightSamples
 

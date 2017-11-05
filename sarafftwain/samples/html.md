@@ -1,4 +1,4 @@
-﻿[All products](../../) / [Saraff.Twain.NET](../)
+[All products](../../) / [Saraff.Twain.NET](../#samples)
 # Saraff.Twain.NET HTML Samples
 Download [Saraff.Twain.HtmlSamples.zip](https://goo.gl/R9nHJu) Saraff.Twain.NET HTML Samples (JQuery, Ajax, WCF, ASP.NET)
 

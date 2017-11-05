@@ -1,4 +1,4 @@
-[All products](../../) / [Saraff.Twain.NET](../)
+[All products](../../) / [Saraff.Twain.NET](../#samples)
 # Saraff.Twain.NET Dependency Injection Samples
 Download [Saraff.Twain.DependencyInjectionSamples.zip](https://goo.gl/mu2EPW) samples
 

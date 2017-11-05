@@ -1,4 +1,4 @@
-[All products](../../) / [Saraff.Twain.NET](../)
+[All products](../../) / [Saraff.Twain.NET](../#samples)
 # Saraff.Twain.NET Multithreading Samples
 Download [Saraff.Twain.MultithreadingSamples.zip](https://goo.gl/yprRFA) Saraff.Twain.NET Multithreading Samples
 

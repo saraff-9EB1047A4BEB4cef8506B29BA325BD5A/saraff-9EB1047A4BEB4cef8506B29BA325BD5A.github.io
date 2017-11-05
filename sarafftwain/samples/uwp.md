@@ -1,4 +1,4 @@
-[All products](../../) / [Saraff.Twain.NET](../)
+[All products](../../) / [Saraff.Twain.NET](../#samples)
 # Saraff.Twain.NET UWP Samples (Universal Windows)
 Download [Saraff.Twain.UwpSamples.zip](https://goo.gl/kvAabW) Saraff.Twain.NET UWP Samples (Universal Windows)
 

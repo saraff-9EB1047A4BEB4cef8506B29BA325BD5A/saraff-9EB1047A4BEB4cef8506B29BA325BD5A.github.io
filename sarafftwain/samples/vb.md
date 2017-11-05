@@ -1,4 +1,4 @@
-[All products](../../) / [Saraff.Twain.NET](../)
+[All products](../../) / [Saraff.Twain.NET](../#samples)
 # Saraff.Twain.NET Vb.net Samples
 Download [Saraff.Twain.VbSamples.zip](https://goo.gl/DkedJN) Simple and Advanced Samples
 
