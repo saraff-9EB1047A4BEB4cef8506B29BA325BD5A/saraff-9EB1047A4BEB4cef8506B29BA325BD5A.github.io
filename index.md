@@ -6,7 +6,7 @@ layout: default
 ---
 # [Saraff.Twain.NET]({% link sarafftwain/index.md %})
 Saraff.Twain.NET is the skillful scanning component which allows you to control work of flatbed scanner, web and digital camera and any other TWAIN device from .NET environment. You can use this library in your programs written in any programming languages compatible with .NET technology.
-- ## Saraff.Twain.Extensions
+- ## [Saraff.Twain.Extensions]({% link sarafftwainext/index.md %})
 Saraff.Twain.NET Extensions (LINQ to TWAIN).
 - ## Saraff.Twain.Aux
 Provides outproc interaction with a Saraff.Twain.NET.
