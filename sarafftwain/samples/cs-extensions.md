@@ -1,7 +1,4 @@
----
-layout: default
-title: Saraff.Twain.NET
----
+[All products](../../) / [Saraff.Twain.NET](../)
 # Saraff.Twain.NET Extensions Samples (LINQ to TWAIN)
 Download [Saraff.Twain.Extensions.zip](https://goo.gl/nrZ11W) Simple, Advanced and Console samples
 
