@@ -1,0 +1,22 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+aside#sidebar {
+    float: right;
+    width: 200px;
+    min-height: 504px;
+    padding-left: 20px;
+    padding-top: 20px;
+    font-size: 12px;
+    line-height: 1.3;
+}
+
+#main_content_wrap {
+    min-height: 640px;
+}
+
+#ad-footer {
+    margin-top:40px;
+}
