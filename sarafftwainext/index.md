@@ -57,9 +57,7 @@ this.Dsm.DataSources.ElementAtOrDefault(_dsIndex)? // get a Data Source
         });
 ```
 
-To install Saraff.Twain.Extensions, run the following command in the [Package Manager Console](https://docs.nuget.org/docs/start-here/using-the-package-manager-console)
-```
-PM> Install-Package Saraff.Twain.Extensions
-```
+## [NuGet package](https://www.nuget.org/packages/Saraff.Twain.Extensions/)
+
 Also, you can see: 
 * [Saraff.Twain.NET Extensions Samples (LINQ to TWAIN)]({% link sarafftwain/samples/cs-extensions.md %})
