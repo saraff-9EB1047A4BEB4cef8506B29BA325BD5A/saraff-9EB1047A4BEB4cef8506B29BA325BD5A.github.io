@@ -1,7 +1,11 @@
+---
+layout: default
+title: Saraff.Twain.DS Wiki
+---
 # Saraff.Twain.DS
 Saraff.Twain.DS is the skillful class library which allows you to design drivers (a Data Source) of flatbed scanner, web and digital camera and any other TWAIN device from .NET environment. You can use this library in your programs written in any programming languages compatible with .NET technology. 
 # TWAIN Specification 
-Saraff.Twain.DS implements [TWAIN 2.3 Specification](http://twain.org/scanner-application-developers/specification-and-tools.html). Explanation of [specification](http://twain.org/scanner-application-developers/specification-and-tools.html) is not the purpose of this project. Here will be explained features of the implementation of TWAIN specification.
+Saraff.Twain.DS implements [TWAIN 2.3 Specification](http://twain.org/specification). Explanation of [specification](http://twain.org/specification) is not the purpose of this project. Here will be explained features of the implementation of TWAIN specification.
 # Contents
 * Introduction
 	* [Elements of TWAIN](./w0100.md)

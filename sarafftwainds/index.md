@@ -17,17 +17,17 @@ Saraff.Twain.DS is the skillful class library which allows you to design drivers
 * Windows 2003 / Vista / 2008 / 7 / 8 / 10, 32-bit / 64-bit
 
 ## [NuGet package](https://www.nuget.org/packages/Saraff.Twain.DS/)
-## [Documentation](./wiki/index.md)
+## [Documentation](./wiki/)
 
 ## [&nbsp;](#samples)Samples:
-* [Saraff.Twain.DS.Screen](./content/Saraff.Twain.DS.Screen.zip]] **(NEW. 22.09.2016)** ([TWAIN Certified Driver](https://resource.twain.org/twain-certified-drivers/entry/1536/))
+* [Saraff.Twain.DS.Screen](./download/Saraff.Twain.DS.Screen.zip) **(NEW. 22.09.2016)** ([TWAIN Certified Driver](https://resource.twain.org/twain-certified-drivers/entry/1536/))
 
-![](../content/Home_Saraff.Twain.DS.Screen.jpg)
+![](./content/Home_Saraff.Twain.DS.Screen.jpg)
 
 **Figure 1 - Saraff.Twain.DS.Screen on Windows 10 x64**
 
 # TWAIN Specification 
-Saraff.Twain.DS implements [TWAIN 2.3 Specification](http://twain.org/scanner-application-developers/specification-and-tools.html). Explanation of [specification](http://twain.org/scanner-application-developers/specification-and-tools.html) is not the purpose of this project. Here will be explained features of the implementation of TWAIN specification.
+Saraff.Twain.DS implements [TWAIN 2.3 Specification](http://twain.org/specification). Explanation of [specification](http://twain.org/specification) is not the purpose of this project. Here will be explained features of the implementation of TWAIN specification.
 
 
 _If you notice an error, please let me know about it._
