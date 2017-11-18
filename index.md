@@ -9,12 +9,12 @@ title: SARAFF SOFTWARE
 Saraff.Twain.NET is the skillful scanning component which allows you to control work of flatbed scanner, web and digital camera and any other TWAIN device from .NET environment. You can use this library in your programs written in any programming languages compatible with .NET technology.
 - ## [Saraff.Twain.Extensions]({% link sarafftwainext/index.md %})
 Saraff.Twain.NET Extensions (LINQ to TWAIN).
-- ## Saraff.Twain.Aux
+- ## [Saraff.Twain.Aux](./sarafftwainaux/)
 Provides outproc interaction with a Saraff.Twain.NET.
 
 # [Saraff.Twain.DS]({% link sarafftwainds/index.md %})
 Saraff.Twain.DS is the skillful class library which allows you to design drivers (a Data Source) of flatbed scanner, web and digital camera and any other TWAIN device from .NET environment. You can use this library in your programs written in any programming languages compatible with .NET technology.
-- ## Saraff.Twain.DS.BitmapSource 
+- ## [Saraff.Twain.DS.BitmapSource](./sarafftwaindsbitmap/)
 Simplifies the creation of a Data Source, if it returns a bitmap.
 
 # [Saraff.IoC](./saraffioc/index.md)
@@ -23,7 +23,7 @@ Saraff.IoC is a container that provide lightweight dependency injection for .NET
 Saraff.AxHost.NET Provides hosting for custom components (.NET) in applications with unmanaged code.
 # [Saraff.Tiff.NET](./sarafftiff/index.md)
 Saraff.Tiff.NET is the skillful component which represents a writer and a reader that provides fast, non-cached, forward-only access to TIFF data.
-# Saraff.ThreadingModel.NET 
+# [Saraff.ThreadingModel.NET](./saraffthread/)
 Saraff.ThreadingModel.NET is the skillful component which represents a single threading synchronization.
-# Saraff.VisualFoxpro.NET 
+# [Saraff.VisualFoxpro.NET](./saraffvfp/)
 Hosting .NET Components in a Visual Foxpro.
