@@ -87,6 +87,6 @@ protected override Bitmap Acquire() {
     MaxConnectionCount = 64)]
 ```
 
-Also, you can see:
+## Samples
 * [Saraff.Twain.DS.Screen](../sarafftwainds/download/Saraff.Twain.DS.Screen.zip) ([TWAIN Certified Driver](https://resource.twain.org/twain-certified-drivers/entry/1536/))
 
