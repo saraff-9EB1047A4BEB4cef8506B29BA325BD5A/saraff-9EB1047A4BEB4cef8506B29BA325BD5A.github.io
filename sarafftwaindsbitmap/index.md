@@ -1,6 +1,6 @@
 # Saraff.Twain.DS.BitmapSource
 Using a Saraff.Twain.DS.BitmapSource simplifies the creation of a Data Source, if it returns a bitmap. A Saraff.Twain.DS.BitmapSource overrides a OnImageNativeXfer, OnImageMemXfer and OnImageFileXfer methods.
-Below is a simple example of a data source that returns a black square 100x100 96dpi RGB24. You can download full code of a [SampleDataSource.cs](../download/Minimal2.cs).
+Below is a simple example of a data source that returns a black square 100x100 96dpi RGB24.
 ## Step 1. Define a class of a Data Source
 ```c#
 [Guid("185C9C7B-E6CA-4D50-8D8F-318809689A25")]
@@ -86,3 +86,7 @@ protected override Bitmap Acquire() {
     Language = TwLanguage.RUSSIAN,
     MaxConnectionCount = 64)]
 ```
+
+Also, you can see:
+* [Saraff.Twain.DS.Screen](../sarafftwainds/download/Saraff.Twain.DS.Screen.zip) ([TWAIN Certified Driver](https://resource.twain.org/twain-certified-drivers/entry/1536/))
+
