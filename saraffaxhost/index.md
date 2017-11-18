@@ -19,8 +19,8 @@ Saraff.AxHost.NET Provides hosting for custom components (.NET) in applications 
 	* [IAxHostEvents](./IAxHostEvents.md) interface
 	* [AxHostComponent](./AxHostComponent.md)
 	* [AxHostControl](./AxHostControl.md)
-* [Method Invocation](./Method-Invocation.md)
-* [Event Processing](./Event-Processing.md)
+* [Method Invocation](./MethodInvocation.md)
+* [Event Processing](./EventProcessing.md)
 
 # References
 * [Create ActiveX in .NET Step by Step](http://www.codeproject.com/Articles/24089/Create-ActiveX-in-NET-Step-by-Step)
