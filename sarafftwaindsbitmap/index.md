@@ -1,4 +1,4 @@
-# Saraff.Twain.DS.BitmapSource
+Ôªø# Saraff.Twain.DS.BitmapSource
 Using a Saraff.Twain.DS.BitmapSource simplifies the creation of a Data Source, if it returns a bitmap. A Saraff.Twain.DS.BitmapSource overrides a OnImageNativeXfer, OnImageMemXfer and OnImageFileXfer methods.
 Below is a simple example of a data source that returns a black square 100x100 96dpi RGB24.
 ## Step 1. Define a class of a Data Source
@@ -35,7 +35,7 @@ public SampleDataSource() {
 /// If showUI is <c>true</c>, the Source should display its user interface and wait for
 /// the user to initiate an acquisition. If showUI is <c>false</c>,the Source should
 /// immediately begin acquiring data based on its current configuration (a device that requires the
-/// user to push a button on the device,such as a hand-scanner,will be ìarmedî by this operation and
+/// user to push a button on the device,such as a hand-scanner,will be ‚Äúarmed‚Äù by this operation and
 /// will assert MSG_XFERREADY as soon as the Source has data ready for transfer). The Source should
 /// fail any attempt to set a capability value (TWRC_FAILURE / TWCC_SEQERROR) until it returns to
 /// State 4 (unless an exception approval exists via a CAP_EXTENDEDCAPS agreement).
