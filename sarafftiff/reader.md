@@ -13,7 +13,7 @@ using(var _stream=File.Open("sample.tif",FileMode.Open)) {
 
         // Read Tags
         for(ITag _tag=_reader.ReadTag(); _tag!=null; _tag=_reader.ReadTag()) {
-            Console.Write("{0}: {{ ",_tag.TagId);
+            Console.Write("{0}: { { ",_tag.TagId);
             _dict.Add(_tag.TagId,new Collection<object>());
             switch(_tag.TagId) {
                 case TiffTags.StripOffsets:
