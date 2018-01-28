@@ -7,7 +7,9 @@ title: SARAFF SOFTWARE
 ---
 # [Saraff.Twain.NET]({% link sarafftwain/index.md %})
 Saraff.Twain.NET is the skillful scanning component which allows you to control work of flatbed scanner, web and digital camera and any other TWAIN device from .NET environment. You can use this library in your programs written in any programming languages compatible with .NET technology.
-- ## [Saraff.Twain.Extensions]({% link sarafftwainext/index.md %})
+# [Saraff.TwainX.NET]({% link sarafftwain/index.md %}) (.NET Standard 2.0)
+Saraff.TwainX.NET is the skillful scanning component which allows you to control work of flatbed scanner, web and digital camera and any other TWAIN device from .NET environment. You can use this library in your programs written in any programming languages compatible with .NET technology.
+- ## [Saraff.Twain.Extensions / Saraff.TwainX.Extensions]({% link sarafftwainext/index.md %})
 Saraff.Twain.NET Extensions (LINQ to TWAIN).
 - ## [Saraff.Twain.Aux](./sarafftwainaux/)
 Provides outproc interaction with a Saraff.Twain.NET.
@@ -17,7 +19,7 @@ Saraff.Twain.DS is the skillful class library which allows you to design drivers
 - ## [Saraff.Twain.DS.BitmapSource](./sarafftwaindsbitmap/)
 Simplifies the creation of a Data Source, if it returns a bitmap.
 
-# [Saraff.IoC](./saraffioc/index.md)
+# [Saraff.IoC / Saraff.IoCX](./saraffioc/index.md)
 Saraff.IoC is a container that provide lightweight dependency injection for .NET applications. It helps you split your application into a collection of loosely-coupled, highly-cohesive pieces, and then glue them back together in a flexible manner.
 # [Saraff.AxHost.NET](./saraffaxhost/index.md)
 Saraff.AxHost.NET Provides hosting for custom components (.NET) in applications with unmanaged code.
