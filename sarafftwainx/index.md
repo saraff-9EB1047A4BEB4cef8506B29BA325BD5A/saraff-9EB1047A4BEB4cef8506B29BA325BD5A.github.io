@@ -30,7 +30,7 @@ Saraff.TwainX.NET is the skillful scanning component which allows you to control
 * Linux (was tested on Lubuntu 14.04 LTS x86_32 & Lubuntu 16.04 LTS x86_32)
 * MaxOSX (not tested yet)
 
-## [NuGet package](https://www.nuget.org/packages/Saraff.TwainX/)
+## [NuGet package](https://www.nuget.org/packages/Saraff.TwainX.NET/)
 
 ## [&nbsp;](#samples)Samples:
 * [Saraff.TwainX.NET Core Sample1]({% link download/Saraff.TwainX.NETCoreSample1.zip %}) **(NEW. 28.01.2018)**
