@@ -26,19 +26,19 @@ internal sealed class Service2:Component, IService2 {
 ```
 ## Property Setter Injection
 ```c#
-    internal sealed class MyCustomClass {
+internal sealed class MyCustomClass {
 
-        // ...
+    // ...
 
-        [IoC.ServiceRequired]
-        public IService1 Svc1 { // type of a property can be only is a interface
-            get;
-            set;
-        }
-
-        // ...
-
+    [IoC.ServiceRequired]
+    public IService1 Svc1 { // type of a property can be only is a interface
+        get;
+        set;
     }
+
+    // ...
+
+}
 ```
 
 ```c#
@@ -55,6 +55,31 @@ internal sealed class Service2:Component, IService2 {
     // ...
 }
 ```
+## Method Injection
+Available for a components that implements a service's interfaces
+```c#
+[IoC.ProxyRequired] // The Method Injection pattern require uses a proxy for injections
+internal sealed class Service2:Component, IService2 {
+
+    // ...
+
+    [IoC.ServiceRequired]
+    public TResult MethodA<T1, T2, TResult>(
+        T1 val, 
+        [IoC.ServiceRequired]T2 val, // type of arguments can be is a interface or/and a class
+        [IoC.ServiceRequired]IService1 service1, 
+        [IoC.ServiceRequired]IService2 service2 = null) {
+
+        // ...
+
+    }
+
+    // ...
+}
+```
+
+![]({% link saraffioc/content/m1.jpg%})
+
 ## IServiceProvider
 ```c#
 internal sealed class Service2:Component, IService2 {
