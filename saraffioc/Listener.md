@@ -23,7 +23,7 @@ internal sealed class Service2:Component, IService2 {
 }
 ```
 
-You must bind class (or instance of class) that implement the IListener interface.
+You must bind class (or instance of class) that implement the `IListener` interface.
 
 ```c#
 internal sealed class _Listener : Component, IoC.IListener {
@@ -40,7 +40,7 @@ internal sealed class _Listener : Component, IoC.IListener {
         if(method.Name == "MethodA") {
             return result.ToString() + DateTime.Now.ToString();
         }
-        return null; // If return non-null value, a method will not be invoke, return value will be used as result of invocation. Also, you can throw a exception.
+        return null; // If return non-null value, return value will be used as result of invocation. Also, you can throw a exception.
     }
 }
 ```
