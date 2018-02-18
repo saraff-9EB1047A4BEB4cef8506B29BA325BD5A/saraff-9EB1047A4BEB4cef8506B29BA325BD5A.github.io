@@ -6,3 +6,4 @@ Saraff.IoC is a container that provide lightweight dependency injection for .NET
 ## [Injection Patterns](./InjectionPatterns.md)
 ## [Factory](./Factory.md)
 ## [Configuration](./Configuration.md)
+## [Listener of invocations](./Listener.md)

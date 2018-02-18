@@ -32,6 +32,30 @@ internal sealed class _MyConfiguration:Component, IoC.IConfiguration {
             return typeof(MyServiceRequiredAttribute);
         }
     }
+
+    public Type ProxyRequiredAttributeType 
+        get {
+            return typeof(MyProxyRequiredAttribute);
+        }
+    }
+
+    public Type ListenerType 
+        get {
+            return typeof(IMyListener);
+        }
+    }
+
+    public InvokingCallback InvokingCallback 
+        get {
+            return (listener, method, instance, parameters) => (listener as IMyListener)?.OnInvoking(method, instance, parameters);
+        }
+    }
+
+    public InvokedCallback InvokedCallback 
+        get {
+            return (listener, method, instance, result) => (listener as IMyListener)?.OnInvoked(method, instance, result);
+        }
+    }
 }
 
 // ...
