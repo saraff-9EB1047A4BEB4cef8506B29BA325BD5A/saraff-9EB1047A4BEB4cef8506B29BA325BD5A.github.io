@@ -42,6 +42,13 @@ internal sealed class _Listener : Component, IoC.IListener {
         }
         return null; // If return non-null value, return value will be used as result of invocation. Also, you can throw a exception.
     }
+
+    public Exception OnCatch(MethodBase method, object instance, Exception ex) {
+        if(method.Name == "MethodA") {
+            return MyException(ex.Message, ex); // You can change a exception type
+        }
+        return null; // If return non-null value, return value will be used as result
+    }
 }
 ```
 

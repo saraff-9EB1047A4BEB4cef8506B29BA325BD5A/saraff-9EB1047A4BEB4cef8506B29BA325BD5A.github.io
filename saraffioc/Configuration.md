@@ -56,6 +56,12 @@ internal sealed class _MyConfiguration:Component, IoC.IConfiguration {
             return (listener, method, instance, result) => (listener as IMyListener)?.OnInvoked(method, instance, result);
         }
     }
+
+    public CatchCallback CatchCallback 
+        get {
+            return (listener, method, instance, ex) => (listener as _IListener)?.OnCatch(method, instance, ex);
+        }
+    }
 }
 
 // ...
