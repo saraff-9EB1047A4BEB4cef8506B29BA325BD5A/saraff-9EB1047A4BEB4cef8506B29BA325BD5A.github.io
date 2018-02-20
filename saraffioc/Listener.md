@@ -45,9 +45,9 @@ internal sealed class _Listener : Component, IoC.IListener {
 
     public Exception OnCatch(MethodBase method, object instance, Exception ex) {
         if(method.Name == "MethodA") {
-            return MyException(ex.Message, ex); // You can change a exception type
+            return new MyException(ex.Message, ex); // You can change a exception type
         }
-        return null; // If return non-null value, return value will be used as result
+        return null; // If return non-null value, it will be used as result
     }
 }
 ```
