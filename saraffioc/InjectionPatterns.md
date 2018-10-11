@@ -64,8 +64,8 @@ internal sealed class Service2:Component, IService2 {
     // ...
 
     public TResult MethodA<T1, T2, TResult>(
-        T1 val, 
-        [IoC.ServiceRequired]T2 val, // type of arguments can be is a interface or/and a class
+        T1 val1, 
+        [IoC.ServiceRequired]T2 val2, // type of arguments can be is a interface or/and a class
         [IoC.ServiceRequired]IService1 service1, 
         [IoC.ServiceRequired]IService2 service2 = null) {
 
