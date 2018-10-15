@@ -89,9 +89,9 @@ internal sealed class Service2:Component, IService2 {
         get {
             return this.GetService(typeof(IService1)) as IService1;
             // if you want get instance for specific class (context binding), use a IoC.IContextBinder<,>
-            return this.GetService(typeof(IoC.IContextBinder<IService1,Service2>) as IService1;
+            return this.GetService(typeof(IoC.IContextBinder<IService1,Service2>)) as IService1;
             // or
-            return this.GetService(typeof(IoC.IContextBinder<,>.MakeGenericType(typeof(IService1),this.GetType())) as IService1;
+            return this.GetService(typeof(IoC.IContextBinder<,>).MakeGenericType(typeof(IService1),this.GetType())) as IService1;
         }
     }
 
