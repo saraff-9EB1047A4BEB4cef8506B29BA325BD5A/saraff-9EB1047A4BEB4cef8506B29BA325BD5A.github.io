@@ -79,6 +79,36 @@ internal sealed class Service2:Component, IService2 {
 
 ![]({% link saraffioc/content/m1.jpg%})
 
+## Lazy Injection
+You may defer time to injection. It may be use to resolve cyclic dependency or create expensive resources.
+For this you need to use a IoC.Lazy delegate.
+```c#
+
+internal sealed class MyCustomClass {
+
+    [IoC.ServiceRequired]
+    public MyCustomClass(IoC.Lazy<IService1> svc1/* , ... */) { // type of arguments of constructor can be is a interface or/and class
+    }
+
+    [IoC.ServiceRequired]
+    public IoC.Lazy<IService1> Svc1 { // type of a property can be only is a interface
+        get;
+        set;
+    }
+
+    public TResult MethodA<T1, T2, TResult>(
+        T1 val1, 
+        [IoC.ServiceRequired]IoC.Lazy<T2> val2, // type of arguments can be is a interface or/and a class
+        [IoC.ServiceRequired]IoC.Lazy<IService2> service2 = null) {
+
+        // ...
+
+    }
+    
+    // ...
+}
+```
+
 ## IServiceProvider
 ```c#
 internal sealed class Service2:Component, IService2 {
