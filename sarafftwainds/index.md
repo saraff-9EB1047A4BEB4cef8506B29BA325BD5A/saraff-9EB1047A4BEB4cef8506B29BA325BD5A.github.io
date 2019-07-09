@@ -21,7 +21,7 @@ Saraff.Twain.DS is the skillful class library which allows you to design drivers
 ## [Documentation](./wiki/)
 
 ## [&nbsp;](#samples)Samples:
-* [Saraff.Twain.DS.Screen](./download/Saraff.Twain.DS.Screen.zip) **(NEW. 22.09.2016)** ([TWAIN Certified Driver](https://resource.twain.org/twain-certified-drivers/entry/1536/))
+* [Saraff.Twain.DS.Screen](./download/Saraff.Twain.DS.Screen.zip) **(UPDATED. 09.07.2019)** ([TWAIN Certified Driver](https://resource.twain.org/twain-certified-drivers/entry/1536/))
 
 ![](./content/Home_Saraff.Twain.DS.Screen.jpg)
 
