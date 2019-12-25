@@ -16,8 +16,9 @@ Saraff DirectX DS is TWAIN Data Source that capturing video from a USB web camer
 * .NET Framework 4.0 or higher
 ## Supported platforms:
 * Windows 2003 / Vista / 2008 / 7 / 8 / 10, 32-bit / 64-bit
-
-[Saraff DirectX DS](https://github.com/saraff-9EB1047A4BEB4cef8506B29BA325BD5A/Saraff.Twain.DS.DirectX) Project Page
+## See also
+* [Saraff DirectX DS](https://github.com/saraff-9EB1047A4BEB4cef8506B29BA325BD5A/Saraff.Twain.DS.DirectX) Project Page
+* [Custom capabilities](./capsample.md) of Saraff DirectX DS
 
 ![](./content/wnd1.jpg)
 
