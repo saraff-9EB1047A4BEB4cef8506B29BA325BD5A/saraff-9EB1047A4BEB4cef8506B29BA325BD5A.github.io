@@ -25,6 +25,10 @@ Saraff.Twain.DS implements [TWAIN 2.3 Specification](http://twain.org/specificat
 	* Capabilities
 		* [The list of implemented capabilities](./w1410.md)
 		* [Adding new capabilities](./w1420.md)
+	* DI (Dependency Injection)
+		* [IoC Container Features](./w1510.md)
+		* [Extensions points](./w1520.md)
+		* [Common services](./w1530.md)
 * [Minimal Implementation](./w2000.md)
 * [Minimal Implementation with a Saraff.Twain.DS.BitmapSource](./w3000.md)
 * Advanced Implementation
