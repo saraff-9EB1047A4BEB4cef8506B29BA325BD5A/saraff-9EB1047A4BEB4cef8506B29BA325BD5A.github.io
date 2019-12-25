@@ -89,5 +89,6 @@ protected override Bitmap Acquire() {
 ```
 
 ## Samples
-* [Saraff.Twain.DS.Screen](../sarafftwainds/download/Saraff.Twain.DS.Screen.zip) ([TWAIN Certified Driver](https://resource.twain.org/twain-certified-drivers/entry/1536/))
+* [Saraff Screen DS](../sarafftwainds/download/Saraff.Twain.DS.Screen_1.0.2.690.zip) **(UPDATED. 22.12.2019)** ([TWAIN Certified Driver](https://resource.twain.org/twain-certified-drivers/entry/1650/))
+* [Saraff DirectX DS](https://github.com/saraff-9EB1047A4BEB4cef8506B29BA325BD5A/Saraff.Twain.DS.DirectX) **(UPDATED. 23.12.2019)** ([TWAIN Certified Driver](https://resource.twain.org/twain-certified-drivers/entry/1649/))
 

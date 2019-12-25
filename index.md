@@ -18,6 +18,8 @@ Provides outproc interaction with a Saraff.Twain.NET.
 Saraff.Twain.DS is the skillful class library which allows you to design drivers (a Data Source) of flatbed scanner, web and digital camera and any other TWAIN device from .NET environment. You can use this library in your programs written in any programming languages compatible with .NET technology.
 - ## [Saraff.Twain.DS.BitmapSource](./sarafftwaindsbitmap/)
 Simplifies the creation of a Data Source, if it returns a bitmap.
+- ## [Saraff DirectX DS (Saraff.Twain.DS.DirectX)](./sarafftwaindsdx/)
+TWAIN Data Source that capturing video from a USB web camera and making snapshots using it.
 
 # [Saraff.IoC / Saraff.IoCX](./saraffioc/index.md)
 Saraff.IoC is a container that provide lightweight dependency injection for .NET applications. It helps you split your application into a collection of loosely-coupled, highly-cohesive pieces, and then glue them back together in a flexible manner.

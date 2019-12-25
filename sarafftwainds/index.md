@@ -8,8 +8,8 @@ Saraff.Twain.DS is the skillful class library which allows you to design drivers
 * This is a fully-managed .NET library to guarantee the fast working in .NET Framework
 * Supports Native, Buffered Memory, Disk File and Memory File image transfer mode
 ## Saraff.Twain.DS was tested and has examples of use for:
-* Microsoft Visual 2010
 * Microsoft Visual 2015
+* Microsoft Visual 2019
 ## Supported frameworks:
 * **CLR v4.0**: .net 4.0 / 4.5 / 4.6
 ## System requirements:
