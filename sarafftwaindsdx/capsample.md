@@ -1,5 +1,5 @@
 [All products](../) / [Saraff DirectX DS](./index.md)
-# Saraff.Twain.CapSample
+# Custom Capability of The Saraff DirectX DS
 
 The Saraff DirectX DS supports follows custom capabilities
 
