@@ -1,4 +1,4 @@
-[All products](../)
+[All products](../) / [Saraff DirectX DS](./index.md)
 # Saraff.Twain.CapSample
 
 The Saraff DirectX DS supports follows custom capabilities
@@ -63,7 +63,7 @@ Supported Operations and Containers
 * MSG_GETDEFAULT    TW_ONEVALUE
 * MSG_SET           TW_ONEVALUE
 
-## [Saraff.Twain.CapSample](https://github.com/saraff-9EB1047A4BEB4cef8506B29BA325BD5A/Saraff.Twain.DS.DirectX/tree/master/Saraff.Twain.CapSample) Project Page
+## [Saraff.Twain.CapSample](https://github.com/saraff-9EB1047A4BEB4cef8506B29BA325BD5A/Saraff.Twain.DS.DirectX/tree/master/Saraff.Twain.CapSample)
 ![](./content/wnd2.jpg)
 
 **Figure 1 - Saraff.Twain.CapSample application**
