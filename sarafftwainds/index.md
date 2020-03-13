@@ -22,7 +22,7 @@ Saraff.Twain.DS is the skillful class library which allows you to design drivers
 
 ## [&nbsp;](#samples)Samples:
 * [Saraff Screen DS](./download/Saraff.Twain.DS.Screen_1.0.2.690.zip) **(UPDATED. 22.12.2019)** ([TWAIN Certified Driver](https://resource.twain.org/twain-certified-drivers/entry/1650/))
-* [Saraff DirectX DS](https://github.com/saraff-9EB1047A4BEB4cef8506B29BA325BD5A/Saraff.Twain.DS.DirectX) **(UPDATED. 23.12.2019)** ([TWAIN Certified Driver](https://resource.twain.org/twain-certified-drivers/entry/1649/))
+* [Saraff DirectX DS](https://github.com/saraff-9EB1047A4BEB4cef8506B29BA325BD5A/Saraff.Twain.DS.DirectX) **(UPDATED. 07.03.2019)** ([TWAIN Certified Driver](https://resource.twain.org/twain-certified-drivers/entry/1649/))
 
 ![](./content/Home_Saraff.Twain.DS.Screen.jpg)
 
