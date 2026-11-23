@@ -21,8 +21,8 @@ Simplifies the creation of a Data Source, if it returns a bitmap.
 - ## [Saraff DirectX DS (Saraff.Twain.DS.DirectX)](./sarafftwaindsdx/)
 TWAIN Data Source that capturing video from a USB web camera and making snapshots using it.
 
-# [Saraff.IoC / Saraff.IoCX](./saraffioc/index.md)
-Saraff.IoC is a container that provide lightweight dependency injection for .NET applications. It helps you split your application into a collection of loosely-coupled, highly-cohesive pieces, and then glue them back together in a flexible manner.
+# [Saraff.IoC](./saraffioc/index.md)
+Saraff.IoC is a lightweight, thread-safe dependency injection container for .NET (`net40` and `netstandard2.0`). It provides constructor, property and method injection, singleton/scoped/transient lifetimes, scopes and nested containers, interception, asynchronous initialization and a modern registration API while keeping the legacy `Bind`/`Load` API compatible.
 # [Saraff.AxHost.NET](./saraffaxhost/index.md)
 Saraff.AxHost.NET Provides hosting for custom components (.NET) in applications with unmanaged code.
 # [Saraff.Tiff.NET](./sarafftiff/index.md)

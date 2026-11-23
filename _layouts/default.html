@@ -61,6 +61,46 @@
         ga('send', 'pageview');
       </script>
     {% endif %}
+
+    <!-- Mermaid diagrams: render ```mermaid fenced code blocks as diagrams. -->
+    <style>
+      .mermaid { margin: 1.5em 0; text-align: center; }
+    </style>
+    <script type="text/javascript">
+      (function () {
+        // Kramdown/Rouge wraps fenced blocks in <div class="language-mermaid">;
+        // other Markdown renderers may emit <pre><code class="language-mermaid">.
+        var blocks = document.querySelectorAll('div.language-mermaid, pre > code.language-mermaid');
+        if (!blocks.length) {
+          return;
+        }
+
+        var script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+        script.onload = function () {
+          if (typeof mermaid === 'undefined') {
+            return;
+          }
+          blocks.forEach(function (block) {
+            var diagram = document.createElement('div');
+            diagram.className = 'mermaid';
+            diagram.textContent = block.textContent;
+            if (block.tagName === 'CODE') {
+              var pre = block.parentNode;
+              var wrapper = pre.parentNode && pre.parentNode.classList.contains('highlight')
+                ? pre.parentNode
+                : pre;
+              wrapper.parentNode.replaceChild(diagram, wrapper);
+            } else {
+              block.parentNode.replaceChild(diagram, block);
+            }
+          });
+          mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
+          mermaid.run({ nodes: document.querySelectorAll('.mermaid') });
+        };
+        document.head.appendChild(script);
+      })();
+    </script>
     <script type="text/javascript">
       function _dmBootstrap(file) {
         var _dma = document.createElement('script');

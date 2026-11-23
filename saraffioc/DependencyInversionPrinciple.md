@@ -1,89 +1,115 @@
 [All products](../) / [Saraff.IoC](./index.md)
 # Dependency Inversion Principle
-DIP principle also helps in achieving loose coupling between the classes. It is highly recommended to use DIP and IoC together in order to achieve loose coupling. 
 
-DIP suggests that high-level modules should not depend on low level modules. Both should depend on abstraction.
-## DIP Definition
-* High-level modules should not depend on low-level modules. Both should depend on abstraction. 
-* Abstractions should not depend on details. Details should depend on abstractions. 
+The **Dependency Inversion Principle (DIP)** is one of the SOLID principles. It says two things:
 
-In dependency injection, a dependent object or service is provided with the object it needs at run time. The provided object will satisfy the dependency during program execution but would not be known at compile time. Rather than directly instantiating dependencies, or using static references, the objects a class needs in order to perform its actions are provided to the class in some abstracted form.
+1. **High-level modules should not depend on low-level modules. Both should depend on
+   abstractions.**
+2. **Abstractions should not depend on details. Details should depend on abstractions.**
 
-An example of the traditional way: 
-```c#
-public class UserLogic {
-    private SomeOAuthService _authService;
-    private SomeEmailService _emailService;
+In other words: business logic should not know whether data is stored in SQL Server, a file or
+a web service. It should know only the abstraction it uses.
 
-    public UserLogic() {
-        _authService = new SomeOAuthService();
-        _emailService = new SomeEmailService();
-    }
+```mermaid
+flowchart TB
+    subgraph Bad [Tight coupling]
+        HL1["UserLogic<br/>(high-level)"] --> LL1["SomeOAuthService<br/>(low-level)"]
+        HL1 --> LL2["SomeEmailService<br/>(low-level)"]
+    end
 
-    public void Register(string emailAddress, string password) {
-        var authResult = _authService.RegisterUser(emailAddress,password);
-        _emailService.SendMail(emailAddress, authResult.ConfirmationMessage);
-    }
-}
-
-public class SomeOAuthService {
-    public SomeOAuthResult RegisterUser(string emailAddress, string password) {
-        // <<< Register a new user
-    }
-}
-
-public class SomeEmailService {
-    public SendMail(string emailAddress, string message) {
-        // <<< Send an email
-    }
-}
+    subgraph Good [Dependency inversion]
+        HL2["UserLogic<br/>(high-level)"] --> ABS1["IAuthService"]
+        HL2 --> ABS2["IEmailService"]
+        IMPL1["SomeOAuthService"] -.->|implements| ABS1
+        IMPL2["SomeEmailService"] -.->|implements| ABS2
+    end
 ```
-Looking at the services used in this register action of the account controller, we can observe that changing the service would imply changing a lot of the codebase, especially if the service has been used in multiple parts of the project.
 
-For instance, if the email service is replaced with a new one as shown below, we can see that the tightly coupled email service would need to be changed everywhere is it used in the project.
-```c#
-public class UserLogic {
-    private SomeOAuthService _authService;
-    private CustomEmailService _emailService;
+## A tightly coupled example
 
-    public UserLogic() {
-        _authService = new SomeOAuthService();
-        _emailService = new CustomEmailService();
-    }
+```csharp
+public sealed class UserLogic {
+    private readonly SomeOAuthService _authService = new SomeOAuthService();
+    private readonly SomeEmailService _emailService = new SomeEmailService();
 
     public void Register(string emailAddress, string password) {
-        var authResult = _authService.RegisterUser(emailAddress,password);
-        _emailService.SendMail(emailAddress, authResult.ConfirmationMessage);
+        var result = this._authService.RegisterUser(emailAddress, password);
+        this._emailService.SendMail(emailAddress, result.ConfirmationMessage);
     }
 }
 
-public class CustomEmailService {
+public sealed class SomeOAuthService {
+    public RegistrationResult RegisterUser(string emailAddress, string password) {
+        // register a new user
+        return new RegistrationResult();
+    }
+}
+
+public sealed class SomeEmailService {
     public void SendMail(string emailAddress, string message) {
-        // <<< Send an email
+        // send an email
     }
 }
 ```
-From the examples shown, we can observe that there is a generic function that all email services will provide. It sends an email which can help us provide an abstraction of the email service, which is going to be used even when we do not know which exact service is to be used.
-```c#
+
+Changing `SomeEmailService` means changing `UserLogic`. If the same service is used in many
+places, the change spreads through the codebase.
+
+## The same code with DIP
+
+```csharp
+public interface IAuthService {
+    RegistrationResult RegisterUser(string emailAddress, string password);
+}
+
 public interface IEmailService {
     void SendMail(string emailAddress, string message);
 }
 
-public interface IAuthService {
-    public AuthResult RegisterUser(string emailAddress, string password);
-}
+public sealed class UserLogic {
+    private readonly IAuthService _authService;
+    private readonly IEmailService _emailService;
 
-public class UserLogic {
-    private IAuthService _authService;
-    private IEmailService _emailService;
+    [ServiceRequired]
+    public UserLogic(IAuthService authService, IEmailService emailService) {
+        this._authService = authService;
+        this._emailService = emailService;
+    }
 
     public void Register(string emailAddress, string password) {
-        var _authResult = _authService.RegisterUser(emailAddress,password);
-        _emailService.SendMail(emailAddress, authResult.ConfirmationMessage);
+        var result = this._authService.RegisterUser(emailAddress, password);
+        this._emailService.SendMail(emailAddress, result.ConfirmationMessage);
     }
 }
 ```
 
-[Inversion of Control](./InversionOfControl.md)
-[Dependency Injection](./DependencyInjection.md)
-[IoC Container](./IoCContainer.md)
+Both `UserLogic` and the implementations now depend on abstractions. The concrete classes are
+selected at the composition root:
+
+```csharp
+using (var container = new ServiceContainer()) {
+    container.Register<IAuthService, SomeOAuthService>();
+    container.Register<IEmailService, SomeEmailService>();
+    container.Register<UserLogic, UserLogic>();
+
+    var logic = container.Resolve<UserLogic>();
+    logic.Register("user@example.com", "secret");
+}
+```
+
+## DIP and DI are not the same
+
+* **DIP** is a principle about the direction of dependencies.
+* **DI** is a pattern for supplying dependencies from outside.
+* **IoC** is the broader principle of inverting control.
+* A container is a tool that helps apply DI at scale.
+
+You can follow DIP without a container (manual constructor calls), and you can use a container
+without following DIP (registering concrete classes everywhere). The best results come from
+using both together.
+
+## Read next
+
+* [Inversion of Control](./InversionOfControl.md)
+* [Dependency Injection](./DependencyInjection.md)
+* [IoC Container](./IoCContainer.md)

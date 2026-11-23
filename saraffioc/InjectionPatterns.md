@@ -1,143 +1,328 @@
 [All products](../) / [Saraff.IoC](./index.md)
 # Injection Patterns
-## Constructor Injection
-```c#
 
-internal sealed class MyCustomClass {
+Saraff.IoC supports several injection styles. All of them use the same marker attribute,
+`[ServiceRequired]`, and the same resolution rules.
 
-    [IoC.ServiceRequired]
-    public MyCustomClass(IService1 svc1/* , ... */) { // type of arguments of constructor can be is a interface or/and class
+```mermaid
+flowchart TB
+    Resolve["Resolve / CreateInstance"] --> Plan["Build a type plan"]
+    Plan --> Ctor["Find [ServiceRequired] constructor"]
+    Ctor --> Params["Resolve constructor parameters"]
+    Params --> Create["Create instance"]
+    Create --> Props["Set [ServiceRequired] properties"]
+    Props --> Proxy{"[ProxyRequired]?"}
+    Proxy -->|"Yes"| Wrap["Wrap in proxy<br/>(method injection + interception)"]
+    Proxy -->|"No"| Return["Return instance"]
+    Wrap --> Return
+```
+
+## How a dependency is selected
+
+For each constructor parameter or property type, the container tries the following:
+
+1. A **context binding** for the consumer type:
+   `IContextBinder<TService, TConsumer>`.
+2. A **registration** for `TService` (exact type or open generic).
+3. A **legacy binding** for `TService` (if `Bind` was used).
+4. If `TService` is a **concrete class**, the container creates it (and injects its own
+   dependencies).
+5. Otherwise the dependency is `null`.
+
+```mermaid
+flowchart LR
+    P["Parameter type<br/>TService"] --> C{"Context binding<br/>IContextBinder TService, TConsumer?"}
+    C -->|"found"| UseC["Use context implementation"]
+    C -->|"not found"| R{"Registration for TService?"}
+    R -->|"found"| UseR["Use registered implementation"]
+    R -->|"not found"| B{"Legacy Bind?"}
+    B -->|"found"| UseB["Use bound implementation"]
+    B -->|"not found"| K{"Concrete class?"}
+    K -->|"yes"| Create["Create it"]
+    K -->|"no"| Null["null"]
+```
+
+## Constructor injection
+
+Mark exactly one constructor with `[ServiceRequired]`:
+
+```csharp
+public sealed class OrderService {
+    private readonly IOrderRepository _repository;
+    private readonly ILogger _logger;
+
+    [ServiceRequired]
+    public OrderService(IOrderRepository repository, ILogger logger) {
+        this._repository = repository;
+        this._logger = logger;
     }
 
-    // ...
+    public void Place(Order order) {
+        this._logger.Info($"Placing {order.Id}");
+        this._repository.Save(order);
+    }
 }
 ```
 
-```c#
-internal sealed class Service2:Component, IService2 {
+```csharp
+container.Register<IOrderRepository, SqlOrderRepository>();
+container.Register<ILogger, ConsoleLogger>();
+container.Register<OrderService, OrderService>();
 
-    [IoC.ServiceRequired]
-    public Service2(IService1 svc1/* , ... */) { // type of arguments of a constructor can be is a interface or/and a class
-
-    }
-
-    // ...
-}
-```
-## Property Setter Injection
-```c#
-internal sealed class MyCustomClass {
-
-    // ...
-
-    [IoC.ServiceRequired]
-    public IService1 Svc1 { // type of a property can be only is a interface
-        get;
-        set;
-    }
-
-    // ...
-
-}
+var service = container.Resolve<OrderService>();
 ```
 
-```c#
-internal sealed class Service2:Component, IService2 {
+Rules:
 
-    // ...
+* If a constructor is marked, the container uses it.
+* If no constructor is marked, the container uses the **parameterless** constructor.
+* If there is no marked constructor and no parameterless constructor,
+  `ServiceResolutionException` is thrown. The container does not guess.
+* Parameters without a registration resolve to `null` (or are created if they are concrete
+  classes).
 
-    [IoC.ServiceRequired]
-    public IService1 Svc1 { // type of a property can be only is a interface
-        get;
-        set;
+## Property injection
+
+Mark public properties with `[ServiceRequired]`:
+
+```csharp
+public sealed class OrderController {
+    [ServiceRequired]
+    public IOrderService Orders { get; set; }
+
+    [ServiceRequired]
+    public ILogger Logger { get; set; }
+
+    public void Place(Order order) {
+        this.Logger.Info("Placing order");
+        this.Orders.Place(order);
     }
-
-    // ...
-}
-```
-## Method Injection
-Available for a components that implements a service's interfaces
-```c#
-[IoC.ProxyRequired] // The Method Injection pattern require uses a proxy for injections
-internal sealed class Service2:Component, IService2 {
-
-    // ...
-
-    public TResult MethodA<T1, T2, TResult>(
-        T1 val1, 
-        [IoC.ServiceRequired]T2 val2, // type of arguments can be is a interface or/and a class
-        [IoC.ServiceRequired]IService1 service1, 
-        [IoC.ServiceRequired]IService2 service2 = null) {
-
-        // ...
-
-    }
-
-    // ...
 }
 ```
 
-![]({% link saraffioc/content/m1.jpg%})
+Property injection runs **after** construction. Use it for optional or framework-created
+objects. For required dependencies, constructor injection is safer because it guarantees the
+object is fully initialized.
 
-## Lazy Injection
-You may defer time to injection. It may be use to resolve cyclic dependency or create expensive resources.
-For this you need to use a IoC.Lazy delegate.
-```c#
+## Method injection
 
-internal sealed class MyCustomClass {
+Method injection is available for proxied services. Mark the class with `[ProxyRequired]` and
+the injected parameters with `[ServiceRequired]`:
 
-    [IoC.ServiceRequired]
-    public MyCustomClass(IoC.Lazy<IService1> svc1/* , ... */) { // type of arguments of constructor can be is a interface or/and class
+```csharp
+[ProxyRequired]
+public sealed class ReportService : Component, IReportService {
+    public void Export(
+        Report report,
+        [ServiceRequired] IReportWriter writer,
+        [ServiceRequired] ILogger logger) {
+
+        logger.Info("Exporting report");
+        writer.Write(report);
     }
-
-    [IoC.ServiceRequired]
-    public IoC.Lazy<IService1> Svc1 { // type of a property can be only is a interface
-        get;
-        set;
-    }
-
-    public TResult MethodA<T1, T2, TResult>(
-        T1 val1, 
-        [IoC.ServiceRequired]IoC.Lazy<T2> val2, // type of arguments can be is a interface or/and a class
-        [IoC.ServiceRequired]IoC.Lazy<IService2> service2 = null) {
-
-        // ...
-
-    }
-    
-    // ...
 }
 ```
 
-## IServiceProvider
-```c#
-internal sealed class Service2:Component, IService2 {
+```csharp
+container.Bind<IReportService, ReportService>();
+container.Bind<IReportWriter, PdfReportWriter>();
+container.Bind<ILogger, ConsoleLogger>();
 
-    // ...
+var service = container.Resolve<IReportService>();
+service.Export(report, null, null); // parameters are filled by the proxy
+```
 
-    private IService1 Svc2 {
-        get {
-            return this.GetService(typeof(IService1)) as IService1;
-            // if you want get instance for specific class (context binding), use a IoC.IContextBinder<,>
-            return this.GetService(typeof(IoC.IContextBinder<IService1,Service2>)) as IService1;
-            // or
-            return this.GetService(typeof(IoC.IContextBinder<,>).MakeGenericType(typeof(IService1),this.GetType())) as IService1;
+The proxy fills a parameter only when the caller passes `null` and the parameter is marked with
+`[ServiceRequired]`. This keeps method injection explicit and avoids surprising replacements of
+caller-provided values.
+
+> Method injection requires a proxy. See [Interception and Listeners](./Listener.md) for the
+> proxy pipeline and the supported method shapes.
+
+## Lazy injection
+
+`Saraff.IoC.Lazy<T>` is a delegate that resolves the service when you call it:
+
+```csharp
+public sealed class ReportService {
+    private readonly Lazy<IReportWriter> _writer;
+
+    [ServiceRequired]
+    public ReportService(Lazy<IReportWriter> writer) {
+        this._writer = writer;
+    }
+
+    public void Export(Report report) {
+        // The writer is resolved only here, on first use.
+        this._writer().Write(report);
+    }
+}
+```
+
+Lazy injection is useful for:
+
+* breaking a dependency cycle;
+* deferring expensive construction;
+* resolving a service only on a code path that needs it.
+
+```mermaid
+sequenceDiagram
+    participant C as Container
+    participant R as ReportService
+    participant W as IReportWriter
+
+    C->>R: create with Lazy of IReportWriter
+    Note over R: no writer created yet
+    R->>R: _writer()
+    R->>W: resolve now
+    W-->>R: instance
+```
+
+## `IEnumerable<T>` injection
+
+When a constructor asks for `IEnumerable<T>`, the container injects **all** registrations of
+`T`:
+
+```csharp
+public sealed class PluginHost {
+    private readonly IEnumerable<IPlugin> _plugins;
+
+    [ServiceRequired]
+    public PluginHost(IEnumerable<IPlugin> plugins) {
+        this._plugins = plugins;
+    }
+
+    public void RunAll() {
+        foreach (var plugin in this._plugins) {
+            plugin.Run();
         }
     }
-
-    // ...
-
 }
 ```
 
-```c#
-using(var _container = new IoC.ServiceContainer()) {
+```csharp
+container.Register<IPlugin, EmailPlugin>(ServiceLifetime.Transient);
+container.Register<IPlugin, SmsPlugin>(ServiceLifetime.Transient);
+container.Register<PluginHost, PluginHost>();
+```
 
-    //...
+The order is the same as `ResolveAll<T>()`: current container first, then parents.
 
-    var _provider = _container as IServiceProvider;
-    var _svc = _provider.GetService(typeof(IService1)) as IService1;
+## Context-aware injection
 
-    //...
+Sometimes the same abstraction should resolve to different implementations depending on the
+**consumer**. Use `IContextBinder<TService, TContext>` as the registration key:
+
+```csharp
+public sealed class CheckoutController {
+    [ServiceRequired]
+    public CheckoutController(IPaymentGateway gateway) {
+        this.Gateway = gateway;
+    }
+
+    public IPaymentGateway Gateway { get; }
+}
+
+public sealed class RefundController {
+    [ServiceRequired]
+    public RefundController(IPaymentGateway gateway) {
+        this.Gateway = gateway;
+    }
+
+    public IPaymentGateway Gateway { get; }
 }
 ```
+
+```csharp
+container.Register<IPaymentGateway, DefaultPaymentGateway>();
+container.Register(
+    typeof(IContextBinder<IPaymentGateway, CheckoutController>),
+    typeof(CheckoutPaymentGateway));
+container.Register(
+    typeof(IContextBinder<IPaymentGateway, RefundController>),
+    typeof(RefundPaymentGateway));
+
+var checkout = container.CreateInstance<CheckoutController>();
+var refund = container.CreateInstance<RefundController>();
+
+// checkout.Gateway is CheckoutPaymentGateway
+// refund.Gateway is RefundPaymentGateway
+```
+
+```mermaid
+flowchart TB
+    C1["CheckoutController"] -->|"asks for"| S["IPaymentGateway"]
+    C2["RefundController"] -->|"asks for"| S
+
+    S -->|"context binding"| P1["CheckoutPaymentGateway"]
+    S -->|"context binding"| P2["RefundPaymentGateway"]
+    S -->|"default"| P3["DefaultPaymentGateway"]
+```
+
+The implementation type does not need to implement `IContextBinder`; the marker interface is
+only a resolution key. The same mechanism applies to listeners:
+`IContextBinder<IListener, TService>` selects a listener for a specific service type.
+
+## `IServiceProvider`
+
+`ServiceContainer` implements `IServiceProvider`, so it can be used where the standard
+abstraction is expected:
+
+```csharp
+IServiceProvider provider = container;
+var greeting = (IGreeting)provider.GetService(typeof(IGreeting));
+```
+
+You can also inject `IServiceProvider` itself. The container does not register itself
+automatically, so register the instance first:
+
+```csharp
+container.RegisterInstance<IServiceProvider>(container);
+```
+
+```csharp
+public sealed class LateBoundService {
+    private readonly IServiceProvider _provider;
+
+    [ServiceRequired]
+    public LateBoundService(IServiceProvider provider) {
+        this._provider = provider;
+    }
+
+    public void Run() {
+        var plugin = (IPlugin)this._provider.GetService(typeof(IPlugin));
+        plugin?.Run();
+    }
+}
+```
+
+Prefer constructor injection of the actual dependency. Use `IServiceProvider` only when the
+set of services is not known at design time.
+
+> `GetService` and `Resolve<T>` return `null` for unregistered services. They do not create
+> arbitrary concrete types on demand; use `CreateInstance<T>` when you need a new object.
+
+## Attribute configuration
+
+The attribute used for injection can be replaced. Set `ServiceRequiredAttributeType` on a
+configuration and pass it to the container:
+
+```csharp
+var configuration = new ServiceContainerConfiguration {
+    ServiceRequiredAttributeType = typeof(MyInjectAttribute)
+};
+
+using (var container = new ServiceContainer(configuration)) {
+    // [MyInject] is now used instead of [ServiceRequired]
+}
+```
+
+See [Configuration](./Configuration.md).
+
+## See also
+
+* [Registration](./Registration.md)
+* [Lifetimes and Scopes](./Lifetimes.md)
+* [Interception and Listeners](./Listener.md)
+* [Factories and CreateInstance](./Factory.md)
+* [Configuration](./Configuration.md)

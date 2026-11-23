@@ -1,13 +1,83 @@
 [All products](../) / [Saraff.IoC](./index.md)
 # Inversion of Control Principle
-IoC is a design principle which recommends inversion of different kinds of controls in object oriented design to achieve loose coupling between the application classes. Here, the control means any additional responsibilities a class has other than its main responsibility, such as control over the flow of an application, control over the dependent object creation and binding (Remember SRP-Single Responsibility Principle). If you want to do TDD (Test Driven Development) then you must use IoC principle without which TDD is not possible.
 
-IoC is all about inverting the control. To explain in layman's term, suppose you drive a car to your work place, it means you control the car. IoC principle suggests to invert the control, meaning instead of driving the car yourself, you hire a cab where another person will drive the car. Thus it is called inversion of the control from you to the cab driver. You don't have to drive a car yourself and let the driver do the driving so that you can focus on your main work. 
+**Inversion of Control (IoC)** is a design principle: a class should not control everything it
+depends on. Responsibilities such as creating dependencies, choosing implementations and
+managing object lifetime are moved outside the class.
 
-IoC principle helps in designing loosely coupled classes which make them testable, maintainable and extensible. 
+The classic analogy: instead of driving a car yourself, you take a taxi. You still decide where
+to go, but the driving is delegated. In software, the class keeps its main responsibility and
+delegates object creation and wiring to someone else.
 
-In an object oriented design, classes should be designed in loosely coupled way. Loosely coupled means changes in one class should not force other classes to change, so the whole application can become maintainable and extensible.
+## Without IoC
 
-[Dependency Inversion Principle](./DependencyInversionPrinciple.md)
-[Dependency Injection](./DependencyInjection.md)
-[IoC Container](./IoCContainer.md)
+```csharp
+public sealed class ReportService {
+    private readonly PdfWriter _writer = new PdfWriter();
+
+    public void Export(Report report) {
+        this._writer.Write(report);
+    }
+}
+```
+
+`ReportService` controls the creation of `PdfWriter`. It is coupled to a concrete class, hard to
+test without producing a PDF, and impossible to switch to another writer without editing the
+class.
+
+## With IoC
+
+```csharp
+public interface IReportWriter {
+    void Write(Report report);
+}
+
+public sealed class ReportService {
+    private readonly IReportWriter _writer;
+
+    [ServiceRequired]
+    public ReportService(IReportWriter writer) {
+        this._writer = writer;
+    }
+
+    public void Export(Report report) {
+        this._writer.Write(report);
+    }
+}
+```
+
+`ReportService` no longer creates the writer. It receives an abstraction. The control over
+creation has been inverted: the caller (or the container) decides which writer to use.
+
+```mermaid
+flowchart LR
+    subgraph Before [Without IoC]
+        B1["ReportService"] -->|"creates"| B2["PdfWriter"]
+    end
+
+    subgraph After [With IoC]
+        A1["Composition root"] -->|"creates and passes"| A2["PdfWriter"]
+        A1 -->|"creates and passes"| A3["ReportService"]
+        A3 -->|"uses"| A4["IReportWriter"]
+        A2 -.->|implements| A4
+    end
+```
+
+## Benefits
+
+* **Loose coupling.** A class depends on abstractions, not on concrete implementations.
+* **Testability.** Tests can pass fakes or mocks without touching real infrastructure.
+* **Maintainability.** Replacing an implementation does not require editing every consumer.
+* **Extensibility.** New implementations can be plugged in through the composition root.
+
+## Relationship to DIP and DI
+
+IoC is the broad principle. The **Dependency Inversion Principle** tells you *which way*
+dependencies should point. **Dependency Injection** is one pattern for implementing IoC.
+An **IoC container** automates dependency injection.
+
+## Read next
+
+* [Dependency Inversion Principle](./DependencyInversionPrinciple.md)
+* [Dependency Injection](./DependencyInjection.md)
+* [IoC Container](./IoCContainer.md)
