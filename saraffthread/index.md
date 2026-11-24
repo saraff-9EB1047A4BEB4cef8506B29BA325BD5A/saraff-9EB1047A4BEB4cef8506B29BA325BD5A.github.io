@@ -169,6 +169,7 @@ public sealed class ScanRequestHandler : IQueueMessageHandler<ScanRequest> {
 ### Reference
 
 * [API Reference](./ApiReference.md) — public types and members
+* [Strong Name](./StrongName.md) — public signing, token and net462 caveat
 * [Samples](./Samples.md) — what the sample projects demonstrate
 * [Migration from 1.x](./Migration.md) — breaking changes and code before/after
 * [Troubleshooting](./Troubleshooting.md) — symptoms, causes and fixes
@@ -194,3 +195,5 @@ public sealed class ScanRequestHandler : IQueueMessageHandler<ScanRequest> {
   to queued work and handlers.
 * Event handlers run synchronously; an exception in a handler propagates to the caller that
   triggered the event.
+* `net8.0-windows` is public-signed (`54f373c993f693dc`); `net462` is unsigned — see
+  [Strong Name](./StrongName.md).

@@ -205,4 +205,6 @@ They may change between minor versions; depend only on the public API.
 * Public constructors of `SingleThreadedProxy` are preserved from 1.x.
 * Removing `Core.EventHandlerHelper` (public in 1.x) in 2.0 is a breaking change if it was
   referenced or derived from directly; use the public proxy and dispatcher instead.
-* The assembly is no longer strong-named; see [Migration](./Migration.md).
+* `net8.0-windows` is public-signed with `eng/strongname.public.snk` (token `54f373c993f693dc`);
+  `net462` is unsigned because .NET Framework rejects public-signed assemblies. See
+  [Strong Name](./StrongName.md).

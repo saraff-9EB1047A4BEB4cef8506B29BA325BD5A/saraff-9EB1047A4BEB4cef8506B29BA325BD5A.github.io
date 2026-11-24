@@ -8,7 +8,7 @@ frameworks and the event pipeline. This page lists everything that can affect ex
 |---|---|---|
 | Target framework | .NET Framework 2.0 | `net462`, `net8.0-windows` |
 | Packaging | old-style `.csproj`, no solution/tests/CI | SDK-style, solution, tests, CI, NuGet package |
-| Strong name | signed with `sign.snk` | **not signed** (key removed from the repository) |
+| Strong name | signed with committed `sign.snk` | `net8.0-windows` public-signed (`54f373c993f693dc`); `net462` unsigned |
 | Dispatcher | private helper thread per proxy | `SingleThreadedDispatcher`, shareable and disposable |
 | Serialization | `Monitor.Enter` on the proxy | FIFO dispatcher queue |
 | Event pipeline | runtime IL generation via `AssemblyBuilder` | expression trees, cached shapes |
@@ -105,20 +105,33 @@ thread runs it.
 
 ## Strong naming
 
-The repository no longer contains a signing key. If your project used assembly binding redirects
-or `InternalsVisibleTo` with the old public key token, update them:
+The committed `sign.snk` was removed because its private key was public. Version 2.0 uses
+**public signing** for `net8.0-windows` with `eng/strongname.public.snk`; no private key is stored in
+the repository. `net462` stays unsigned because .NET Framework verifies strong names and rejects
+public-signed/delay-signed assemblies (`HRESULT 0x80131045`).
+
+| Target | Strong name | Public key token |
+|---|---|---|
+| `net8.0-windows` | `PublicSign` | `54f373c993f693dc` |
+| `net462` | none | — |
+
+Update binding redirects and `assemblyIdentity` entries:
 
 ```xml
 <!-- 1.x -->
 <assemblyIdentity name="Saraff.ThreadingModel"
                   publicKeyToken="..." culture="neutral" />
 
-<!-- 2.0 -->
+<!-- 2.0, net8.0-windows -->
 <assemblyIdentity name="Saraff.ThreadingModel"
-                  publicKeyToken="null" culture="neutral" />
+                  publicKeyToken="54f373c993f693dc" culture="neutral" />
+
+<!-- 2.0, net462 (unsigned) -->
+<assemblyIdentity name="Saraff.ThreadingModel" culture="neutral" />
 ```
 
-If you need a strong-named build, sign the assembly in your own build pipeline.
+If your `net462` application requires a strong name (GAC, verification enabled), full-sign it with
+a private key kept outside the repository. See [Strong Name](./StrongName.md).
 
 ## Migration checklist
 
@@ -133,6 +146,8 @@ If you need a strong-named build, sign the assembly in your own build pipeline.
 7. Dispose proxies, dispatchers and containers. Prefer `using` blocks.
 8. For new code, register a dispatcher and proxies through Saraff.IoC (see
    [Dependency Injection](./DependencyInjection.md)).
+9. Update binding redirects/`assemblyIdentity` for the new public key token (see
+   [Strong Name](./StrongName.md)).
 
 ## Code before and after
 

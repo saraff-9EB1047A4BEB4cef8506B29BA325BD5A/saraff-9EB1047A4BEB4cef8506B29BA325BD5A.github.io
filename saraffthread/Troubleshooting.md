@@ -13,6 +13,7 @@
 | `InvalidOperationException` "no handler registered" | message type has no handler | register one or set `IgnoreUnhandledMessages` |
 | `NotSupportedException` on a proxy | `net8.0-windows` class target or multiple interfaces | use `(serviceType, implementationType, ...)` with an interface |
 | `NotSupportedException` on `+= event` | delegate has `ref`/`out` parameters | use an event delegate without by-ref parameters |
+| `FileLoadException` / `0x80131045` | public-signed `net462` assembly cannot be verified by .NET Framework | use `net8.0-windows` or full-sign `net462` with a private key |
 | UI freezes during a call | blocking `Send`/`Invoke` on the UI thread | `await dispatcher.InvokeAsync(...)` |
 | COM call hangs | pump disabled or wrong apartment | keep `UseMessagePump = true` and `ApartmentState.STA` |
 | Event handler never runs | subscription was disposed, or handler context cannot `Send` | keep the proxy alive; check the captured `SynchronizationContext` |
@@ -146,6 +147,23 @@ The implicit constructors require exactly one interface. Specify it explicitly:
 ```csharp
 new SingleThreadedProxy(typeof(IFirst), typeof(TwoInterfaces));
 ```
+
+## Strong-name verification failures
+
+```text
+Could not load file or assembly 'Saraff.ThreadingModel, ... PublicKeyToken=54f373c993f693dc'
+... The strong name signature could not be verified. (HRESULT: 0x80131045)
+```
+
+The `net8.0-windows` assembly is **public-signed**: it has a strong-name identity but no
+cryptographic signature. .NET Framework verifies strong names and rejects such assemblies; .NET
+Core/.NET 5+ does not.
+
+* For `net462` consumers, use the unsigned `net462` assembly from the package (do not copy the
+  `net8.0-windows` DLL) or full-sign it with a private key as described in
+  [Strong Name](./StrongName.md).
+* For `net8.0-windows` consumers, no action is required.
+* Do not enable strong-name verification for a public-signed assembly; it cannot pass.
 
 ## Event problems
 
