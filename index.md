@@ -28,6 +28,6 @@ Saraff.AxHost.NET Provides hosting for custom components (.NET) in applications 
 # [Saraff.Tiff.NET](./sarafftiff/index.md)
 Saraff.Tiff.NET is the skillful component which represents a writer and a reader that provides fast, non-cached, forward-only access to TIFF data.
 # [Saraff.ThreadingModel.NET](./saraffthread/)
-Saraff.ThreadingModel.NET is the skillful component which represents a single threading synchronization.
+Saraff.ThreadingModel.NET is a single-threaded execution model for .NET: an STA dispatcher with a Win32 message pump, an interface proxy that marshals every call to that thread, and a DI-friendly message queue (`net462` and `net8.0-windows`).
 # [Saraff.VisualFoxpro.NET](./saraffvfp/)
 Hosting .NET Components in a Visual Foxpro.
