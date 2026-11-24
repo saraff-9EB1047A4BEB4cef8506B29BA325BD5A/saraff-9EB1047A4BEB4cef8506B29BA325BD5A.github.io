@@ -4,6 +4,11 @@ title: Saraff.Twain.NET Wiki
 ---
 [All products](../../) / [Saraff.Twain.NET](../)
 # TWAIN Specification 
+
+> **Modern documentation:** see [Getting Started](../GettingStarted.md), [Architecture](../Architecture.md),
+> [Scanning](../Scanning.md), [Migration](../Migration.md) and [Troubleshooting](../Troubleshooting.md).
+> This wiki remains a detailed reference for the TWAIN specification and implementation notes.
+
 Saraff.Twain.NET implements [TWAIN 2.4 Specification](http://www.twain.org/specification/). Explanation of [specification](http://www.twain.org/specification/) is not the purpose of this project. Here will be explained features of the implementation of TWAIN specification.
 
 # Contents

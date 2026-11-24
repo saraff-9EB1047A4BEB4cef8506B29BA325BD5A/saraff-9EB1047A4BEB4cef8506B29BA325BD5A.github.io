@@ -6,9 +6,9 @@ layout: default
 title: SARAFF SOFTWARE
 ---
 # [Saraff.Twain.NET]({% link sarafftwain/index.md %})
-Saraff.Twain.NET is the skillful scanning component which allows you to control work of flatbed scanner, web and digital camera and any other TWAIN device from .NET environment. You can use this library in your programs written in any programming languages compatible with .NET technology.
-# [Saraff.TwainX.NET]({% link sarafftwainx/index.md %}) (.NET Standard 2.0)
-Saraff.TwainX.NET is the skillful scanning component which allows you to control work of flatbed scanner, web and digital camera and any other TWAIN device from .NET environment. You can use this library in your programs written in any programming languages compatible with .NET technology.
+Saraff.Twain.NET is the Windows TWAIN component (`net462`, `net8.0-windows`) for WinForms and WPF applications. It supports TWAIN 1.x and 2.x sources, `Twain32`, image transfer and strong capability control.
+# [Saraff.TwainX]({% link sarafftwainx/index.md %}) (.NET Standard 2.0)
+Saraff.TwainX is the stream-based TWAIN 2.x component for `netstandard2.0`. It has no WinForms/WPF dependency and provides synchronous `Acquire()` and asynchronous `AcquireAsync()` acquisition.
 - ## [Saraff.Twain.Extensions / Saraff.TwainX.Extensions]({% link sarafftwainext/index.md %})
 Saraff.Twain.NET Extensions (LINQ to TWAIN).
 - ## [Saraff.Twain.Aux](./sarafftwainaux/)
