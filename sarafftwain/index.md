@@ -95,6 +95,7 @@ dotnet add package Saraff.Twain
 
 * [Capabilities](./Scanning.md#capabilities) — resolution, pixel type, ADF and other settings
 * [Image transfer](./Scanning.md#image-transfer) — native, memory and file modes
+* [Image Pipeline](./ImagePipeline.md) — `IStreamProvider`, `IImageHandler`, `IImageFactory<T>`
 * [Threading and UI](./Architecture.md#threading-and-ui) — parent window, message loop and `Dispose`
 * [API Reference](./ApiReference.md) — public types at a glance
 

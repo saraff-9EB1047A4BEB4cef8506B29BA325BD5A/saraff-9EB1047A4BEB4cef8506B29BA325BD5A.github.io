@@ -150,6 +150,8 @@ Events:
 * All session calls must use one thread.
 * Native memory is released through `TwainDsmBuffer`/`_Memory` helpers.
 * Events are invoked through a safe dispatcher that isolates handler exceptions.
+* Native transfer can be customised through `IStreamProvider` and `IImageHandler`; custom image
+  types are created through `IImageFactory<T>` — see [Image Pipeline](./ImagePipeline.md).
 
 ## Product boundary
 

@@ -125,6 +125,7 @@ dotnet add package Saraff.TwainX
 
 * [Threading and UI](./Threading.md) — `Acquire()` vs `AcquireAsync()`, `Parent`, event threads
 * [Images and Transfer](./TransferAndImages.md) — streams, ownership, transfer modes, progress
+* [Image Pipeline](./ImagePipeline.md) — `IStreamProvider`, `IImageHandler`, `IImageFactory<T>`
 * [API Reference](./ApiReference.md) — public types at a glance
 
 ### Migration and support

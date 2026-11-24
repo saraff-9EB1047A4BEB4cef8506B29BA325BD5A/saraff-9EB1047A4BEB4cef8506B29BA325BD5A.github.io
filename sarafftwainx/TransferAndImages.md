@@ -158,6 +158,7 @@ manually if the handler touches UI.
 
 ## Next
 
+* [Image Pipeline](./ImagePipeline.md) — `IStreamProvider`, `IImageHandler` and `IImageFactory<T>`
 * [Async Acquisition](./AsyncAcquisition.md)
 * [Threading and UI](./Threading.md)
 * [Troubleshooting](./Troubleshooting.md)

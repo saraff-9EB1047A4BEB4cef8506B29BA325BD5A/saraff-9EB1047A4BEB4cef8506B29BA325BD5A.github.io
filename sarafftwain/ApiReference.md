@@ -64,6 +64,16 @@ Namespace: `Saraff.Twain`
 | `DeviceEvent` | Scanner device event |
 | `TwainStateChanged` | Session state flags changed |
 
+### Image extension points
+
+| Interface | Description |
+|---|---|
+| `IStreamProvider` | Provides a stream for native image data |
+| `IImageHandler` | Converts native memory to a stream |
+| `IImageFactory<T>` | Converts a stream to a custom image type |
+
+See [Image Pipeline](./ImagePipeline.md).
+
 ### Nested helper types
 
 | Type | Description |

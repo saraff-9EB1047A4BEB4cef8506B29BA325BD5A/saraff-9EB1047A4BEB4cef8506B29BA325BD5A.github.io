@@ -230,6 +230,7 @@ Custom DS data stores source-specific settings such as colour tables and calibra
 
 ## Next
 
+* [Image Pipeline](./ImagePipeline.md) — `IStreamProvider`, `IImageHandler` and `IImageFactory<T>`
 * [Getting Started](./GettingStarted.md) — a complete WinForms example
 * [Architecture](./Architecture.md) — message filter and session internals
 * [Migration](./Migration.md) — from .NET 2.0 / old package versions

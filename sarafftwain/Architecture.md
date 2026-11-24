@@ -151,8 +151,9 @@ the resulting image. The default handlers are:
 * `Tiff` on Unix
 * `Pict` on macOS
 
-Custom handlers can be supplied through `GetService(typeof(IImageHandler))` if the component has a
-container/site.
+Custom handlers and stream providers can be supplied through
+`GetService(typeof(IImageHandler))` / `GetService(typeof(IStreamProvider))` if the component has a
+container/site. See [Image Pipeline](./ImagePipeline.md).
 
 ## Product boundaries
 
