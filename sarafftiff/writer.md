@@ -1,43 +1,236 @@
 [All products](../) / [Saraff.Tiff.NET](./index.md)
 # Writer
-```c#
-using(var _stream=File.Create("sample.tif")) {
-    var _writer=TiffWriter.Create(_stream);
 
-    var _handle=_writer.WriteHeader(); // Write Header
+`TiffWriter` writes classic TIFF files in the order the format expects: header, raw data,
+IFD entries and delayed value blocks. It validates the tag set, sorts entries by tag id,
+writes small values inline, writes larger values out-of-line and patches every offset.
 
-    for(int _page=0; _page<4; _page++) {
-        var _strips=new TiffHandle[16];
-        var _stripByteCounts=new uint[16];
-        for(byte i=0; i<_strips.Length; i++) {
-            var _buf=new byte[Program._imageWidth*(Program._imageHeight/_strips.Length)*3];
-            
-            // Generating data ...
+## Writing pipeline
 
-            _strips[i]=_writer.WriteData(_buf); // Write Strip
-            _stripByteCounts[i]=(uint)_buf.Length;
-        }
+```mermaid
+sequenceDiagram
+    participant App
+    participant W as TiffWriter
+    participant IO as TiffBinaryWriter
+    participant S as Stream
 
-        // Write Image File Directory
-        _handle=_writer.WriteImageFileDirectory(_handle, new Collection<ITag> {
-            Tag<uint>.Create(TiffTags.ImageWidth,Program._imageWidth),
-            Tag<uint>.Create(TiffTags.ImageLength,Program._imageHeight),
-            Tag<ushort>.Create(TiffTags.BitsPerSample,8,8,8),
-            Tag<TiffCompression>.Create(TiffTags.Compression,TiffCompression.NONE),
-            Tag<TiffPhotoMetric>.Create(TiffTags.PhotometricInterpretation,TiffPhotoMetric.RGB),
-            Tag<TiffHandle>.Create(TiffTags.StripOffsets,_strips),
-            Tag<ushort>.Create(TiffTags.SamplesPerPixel,3),
-            Tag<uint>.Create(TiffTags.RowsPerStrip,Program._imageHeight/16),
-            Tag<uint>.Create(TiffTags.StripByteCounts,_stripByteCounts),
-            Tag<ulong>.Create(TiffTags.XResolution,(1UL<<32)|300UL),
-            Tag<ulong>.Create(TiffTags.YResolution,(1UL<<32)|300UL),
-            Tag<TiffResolutionUnit>.Create(TiffTags.ResolutionUnit,TiffResolutionUnit.INCH),
-            Tag<char>.Create(TiffTags.Software,"SARAFF SOFTWARE".ToCharArray()),
-            Tag<char>.Create(TiffTags.Copyright,"(c) SARAFF 2014".ToCharArray())
-        });
+    App->>W: WriteHeader()
+    W->>IO: magic, version 42, first-IFD placeholder
+    W-->>App: header handle
+
+    App->>W: WriteData(strip bytes)
+    W->>IO: raw bytes
+    W-->>App: data handle
+
+    App->>W: WriteImageFileDirectory(owner, tags)
+    W->>W: validate tags, sort, serialize
+    W->>IO: patch owner to new IFD offset
+    W->>IO: write count and entries
+    W->>IO: write next-IFD = 0
+    W->>IO: write delayed value blocks
+    W-->>App: next-IFD handle
+```
+
+The writer is forward-only. You cannot go back and rewrite an IFD after the next page has been
+written; use the returned handle for chaining instead.
+
+## Quick start
+
+```csharp
+using System;
+using System.Collections.ObjectModel;
+using System.IO;
+using Saraff.Tiff;
+using Saraff.Tiff.Core;
+
+using var stream = File.Create("sample.tif");
+using var writer = TiffWriter.Create(stream, new TiffWriterOptions {
+    LeaveOpen = true,
+    ByteOrder = TiffByteOrder.LittleEndian,
+    MaxValueBytes = 64 * 1024 * 1024
+});
+
+var owner = writer.WriteHeader(); // header must be at relative position 0
+
+var strips = new TiffHandle[stripCount];
+var stripByteCounts = new uint[stripCount];
+for (var i = 0; i < stripCount; i++) {
+    var buffer = new byte[stripSize];
+    // fill the strip with raw pixel bytes
+    strips[i] = writer.WriteData(buffer);
+    stripByteCounts[i] = (uint)buffer.Length;
+}
+
+var nextIfd = writer.WriteImageFileDirectory(owner, new Collection<ITag> {
+    Tag<uint>.Create(TiffTags.ImageWidth, (uint)width),
+    Tag<uint>.Create(TiffTags.ImageLength, (uint)height),
+    Tag<ushort>.Create(TiffTags.BitsPerSample, 8, 8, 8),
+    Tag<TiffCompression>.Create(TiffTags.Compression, TiffCompression.NONE),
+    Tag<TiffPhotoMetric>.Create(TiffTags.PhotometricInterpretation, TiffPhotoMetric.RGB),
+    Tag<TiffHandle>.Create(TiffTags.StripOffsets, strips),
+    Tag<ushort>.Create(TiffTags.SamplesPerPixel, 3),
+    Tag<uint>.Create(TiffTags.RowsPerStrip, (uint)rowsPerStrip),
+    Tag<uint>.Create(TiffTags.StripByteCounts, stripByteCounts),
+    Tag<TiffRational>.Create(TiffTags.XResolution, new TiffRational(300, 1)),
+    Tag<TiffRational>.Create(TiffTags.YResolution, new TiffRational(300, 1)),
+    Tag<TiffResolutionUnit>.Create(TiffTags.ResolutionUnit, TiffResolutionUnit.INCH),
+    Tag<string>.Create(TiffTags.Software, "SARAFF SOFTWARE"),
+    Tag<string>.Create(TiffTags.Copyright, "(c) SARAFF 2026")
+});
+
+writer.Flush();
+```
+
+`nextIfd` is a handle to the next-IFD offset field. It is not needed for a single-page file,
+but it is the `owner` for the next page.
+
+## Multi-page files
+
+```csharp
+var owner = writer.WriteHeader();
+
+for (var page = 0; page < pageCount; page++) {
+    var strips = new TiffHandle[stripCount];
+    var stripByteCounts = new uint[stripCount];
+
+    for (var i = 0; i < stripCount; i++) {
+        var buffer = new byte[stripSize];
+        // fill the strip with raw pixel bytes for this page
+        strips[i] = writer.WriteData(buffer);
+        stripByteCounts[i] = (uint)buffer.Length;
     }
+
+    owner = writer.WriteImageFileDirectory(owner, new Collection<ITag> {
+        Tag<uint>.Create(TiffTags.ImageWidth, (uint)width),
+        Tag<uint>.Create(TiffTags.ImageLength, (uint)height),
+        Tag<ushort>.Create(TiffTags.BitsPerSample, 8, 8, 8),
+        Tag<TiffCompression>.Create(TiffTags.Compression, TiffCompression.NONE),
+        Tag<TiffPhotoMetric>.Create(TiffTags.PhotometricInterpretation, TiffPhotoMetric.RGB),
+        Tag<TiffHandle>.Create(TiffTags.StripOffsets, strips),
+        Tag<ushort>.Create(TiffTags.SamplesPerPixel, 3),
+        Tag<uint>.Create(TiffTags.RowsPerStrip, (uint)height),
+        Tag<uint>.Create(TiffTags.StripByteCounts, stripByteCounts)
+    });
 }
 ```
 
+```mermaid
+flowchart LR
+    H["Header<br/>first IFD"] --> P0["Page 0 IFD<br/>next = page 1"]
+    P0 --> P1["Page 1 IFD<br/>next = page 2"]
+    P1 --> P2["Page 2 IFD<br/>next = 0"]
+    P2 --> End["End"]
+```
+
+Each call to `WriteImageFileDirectory` patches the previous owner with the new IFD offset.
+The returned handle always points to the **next-IFD field** of the directory just written.
+
+## Inline and out-of-line values
+
+The writer decides automatically:
+
+```mermaid
+flowchart TD
+    V["Tag value data<br/>itemSize x count"] --> Q{"total <= 4 bytes?"}
+    Q -->|yes| IN["Write bytes into the 4-byte value field<br/>zero-pad the remainder"]
+    Q -->|no| OUT["Write the entry with a placeholder offset<br/>write the value after the IFD<br/>patch the offset"]
+```
+
+Out-of-line blocks are aligned to an even offset. Tag entries are sorted by tag id. Duplicate
+tag ids are rejected.
+
+See [TIFF data model](./data-model.md) for the exact type sizes and the entry layout.
+
+## Tag value types
+
+| CLR value | TIFF type | Notes |
+|---|---|---|
+| `string` | `ASCII` | NUL-terminated per string value |
+| `char` | `ASCII` | One byte per character, no implicit terminator |
+| `ushort`, `short` | `SHORT`, `SSHORT` | 2-byte integral values |
+| `uint`, `int` | `LONG`, `SLONG` | 4-byte integral values |
+| `TiffRational` | `RATIONAL` | Preferred for resolutions |
+| `TiffHandle` | `LONG` | Writes the relative offset of the handle |
+| enum | underlying integral type | For example `TiffCompression` -> `SHORT` |
+| `float`, `double` | `FLOAT`, `DOUBLE` | IEEE values |
+| `byte`, `sbyte` | `BYTE`, `SBYTE` | Raw bytes |
+
+> Prefer `Tag<string>` for ASCII and `Tag<TiffRational>` for rational values. Writing raw
+> `ulong`/`long` rationals is still accepted for legacy compatibility, but reading returns a
+> `TiffRational`, so the round trip is not symmetrical.
+
+## Embedded TIFF with `BaseOffset`
+
+```csharp
+using var stream = File.Create("container.bin");
+stream.Write(containerPrefix); // write the outer container prefix
+
+using var writer = TiffWriter.Create(stream, new TiffWriterOptions {
+    BaseOffset = containerPrefix.Length
+});
+
+var owner = writer.WriteHeader(); // header at BaseOffset
+```
+
+All TIFF offsets are stored relative to the header. The physical stream position is
+`BaseOffset + offset`. See [TIFF data model](./data-model.md) for a visual explanation.
+
+## Big-endian output
+
+```csharp
+using var writer = TiffWriter.Create(stream, new TiffWriterOptions {
+    ByteOrder = TiffByteOrder.BigEndian
+});
+```
+
+The header starts with `MM`, multi-byte values are written most-significant-byte first, and
+the reader auto-detects the order. Inline values are still written at the beginning of the
+4-byte value field, as required by the TIFF layout.
+
+## Validation rules
+
+`WriteImageFileDirectory` validates the complete tag set before patching the owner:
+
+| Rule | Result on violation |
+|---|---|
+| Owner handle is open | `ArgumentException` |
+| Tags collection is not null | `ArgumentNullException` |
+| Tag count <= 65535 | `ArgumentException` |
+| Tag ids are unique | `ArgumentException` |
+| Every tag implements `ITagValues` | `ArgumentException` |
+| Every tag has at least one value | `ArgumentException` |
+| Serialized length matches `Count` | `ArgumentException` |
+| Data type is supported | `ArgumentException` |
+| Value size <= `MaxValueBytes` | `ArgumentException` |
+| File offsets fit into 32 bits | `NotSupportedException` |
+| Header is written at relative position 0 | `InvalidOperationException` |
+
+`Tag<T>.Create` also rejects null arrays, empty value arrays and unsupported CLR types early.
+
+## Errors
+
+| Exception | Typical cause |
+|---|---|
+| `ArgumentException` | Invalid tag set, duplicate tag, empty values, bad data type |
+| `InvalidOperationException` | `WriteHeader()` not at relative position 0 |
+| `NotSupportedException` | Data beyond 4 GiB |
+| `ArgumentNullException` | Null stream, options, tags or data |
+| `ObjectDisposedException` | Writer used after `Dispose()` |
+| `IOException` | Underlying stream failure |
+
+## Ownership and disposal
+
+* `LeaveOpen` defaults to `true`; the writer does not dispose the stream.
+* The writer does not dispose `TiffHandle` objects supplied by the caller.
+* `Dispose()` flushes the writer and then optionally disposes the stream.
+* A `TiffWriter` is not thread-safe. Use one writer per stream.
+
+## Sample output
+
+The original sample image created by the writer:
+
 ![](./content/Home_sample.jpg)
-[Download Image File](./content/Home_test.tif)
+
+[Download the sample TIFF file](./content/Home_test.tif)
+
+Next: [Reader](./reader.md) and [Safety and limits](./safety.md).

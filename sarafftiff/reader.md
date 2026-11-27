@@ -1,80 +1,249 @@
 [All products](../) / [Saraff.Tiff.NET](./index.md)
 # Reader
-```c#
-using(var _stream=File.Open("sample.tif",FileMode.Open)) {
-    var _reader=TiffReader.Create(_stream);
 
-    _reader.ReadHeader(); // Read Header
+`TiffReader` gives forward-only, non-cached access to classic TIFF data. It reads the header,
+then IFDs, then tags and values in a strict order. Tag values are buffered in one bounded block
+per tag; pixel data is read separately through `ReadData`.
 
-    // Read Image File Directories
-    for(var _count=_reader.ReadImageFileDirectory(); _count!=0; _count=_reader.ReadImageFileDirectory()) {
-        Console.WriteLine("ImageFileDirectory: {0} tags.",_count);
-        var _dict=new Dictionary<TiffTags,Collection<object>>();
+## Reading lifecycle
 
-        // Read Tags
-        for(ITag _tag=_reader.ReadTag(); _tag!=null; _tag=_reader.ReadTag()) {
-            Console.Write("{0}: { { ",_tag.TagId);
-            _dict.Add(_tag.TagId,new Collection<object>());
-            switch(_tag.TagId) {
-                case TiffTags.StripOffsets:
-                    // Read Values of Tag
-                    for(object _value=_reader.ReadHandle(); _value!=null; _value=_reader.ReadHandle()) {
-                        Console.Write("{0} ",_value);
-                        _dict[_tag.TagId].Add(_value);
-                    }
-                    break;
-                default:
-                    // Read Values of Tag
-                    for(object _value=_reader.ReadValue(); _value!=null; _value=_reader.ReadValue()) {
-                        Console.Write("{0} ",(_value is ulong)?((float)((ulong)_value&0xffffffff)/(float)((ulong)_value>>32)):_value);
-                        _dict[_tag.TagId].Add(_value);
-                    }
-                    break;
+```mermaid
+sequenceDiagram
+    participant App
+    participant R as TiffReader
+    participant BR as TiffBinaryReader
+    participant S as Stream
+
+    App->>R: ReadHeader()
+    R->>BR: magic, version, first IFD offset
+    BR->>S: read at BaseOffset
+    App->>R: ReadImageFileDirectory()
+    R->>BR: validate IFD offset and count
+    R->>BR: check cycle and MaxPages
+    App->>R: ReadTag()
+    R->>BR: read 12-byte entry
+    R->>BR: read value block (bounded)
+    R-->>App: ITag + ITagInfo metadata
+    App->>R: ReadValue()
+    R-->>App: typed value or null
+    App->>R: ReadData(handle, count)
+    R->>BR: seek, read raw bytes, restore position
+```
+
+## Quick start
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using Saraff.Tiff;
+using Saraff.Tiff.Core;
+
+using var stream = File.OpenRead("sample.tif");
+using var reader = TiffReader.Create(stream, new TiffReaderOptions {
+    LeaveOpen = true,
+    MaxValueBytes = 64 * 1024 * 1024,
+    MaxPages = 1000,
+    BaseOffset = 0
+});
+
+reader.ReadHeader();
+Console.WriteLine($"TIFF version: {reader.TiffVersion}");
+
+for (var tagCount = reader.ReadImageFileDirectory();
+     tagCount != 0;
+     tagCount = reader.ReadImageFileDirectory()) {
+
+    Console.WriteLine($"IFD with {tagCount} tags");
+    var values = new Dictionary<TiffTags, List<object>>();
+
+    ITag? tag;
+    while ((tag = reader.ReadTag()) != null) {
+        var info = (ITagInfo)tag;
+        var list = new List<object>();
+
+        if (tag.TagId == TiffTags.StripOffsets) {
+            TiffHandle? handle;
+            while ((handle = reader.ReadHandle()) != null) {
+                list.Add(handle);
             }
-            Console.WriteLine("}");
+        } else {
+            object? value;
+            while ((value = reader.ReadValue()) != null) {
+                list.Add(value);
+            }
         }
 
-        // Read Strips
-        for(int i=0; i<_dict[TiffTags.StripOffsets].Count; i++) {
-            Console.WriteLine("Strip {0}: ",i);
-            var _data=_reader.ReadData((TiffHandle)_dict[TiffTags.StripOffsets][i],Convert.ToInt64(_dict[TiffTags.StripByteCounts][i]));
-            for(int ii=0; ii<_data.Length; ii++) {
-                // Show Data
-            }
+        values[tag.TagId] = list;
+        Console.WriteLine($"{tag.TagId}: {info.DataType}, {info.Count} value(s)");
+    }
+
+    // Read pixel strips after all tags have been consumed.
+    if (values.TryGetValue(TiffTags.StripOffsets, out var offsets)
+        && values.TryGetValue(TiffTags.StripByteCounts, out var counts)) {
+        for (var i = 0; i < offsets.Count && i < counts.Count; i++) {
+            var bytes = reader.ReadData(
+                (TiffHandle)offsets[i],
+                Convert.ToInt64(counts[i]));
+            Console.WriteLine($"Strip {i}: {bytes.Length} bytes");
         }
     }
 }
 ```
 
-**Example of the read a TIFF file**
+The strip data is read with `ReadData`, not with `ReadValue`. `ReadData` seeks to the handle
+offset, reads the requested block, restores the reader position and does not change the tag state.
+
+## Strict call order
+
+```mermaid
+stateDiagram-v2
+    [*] --> Header
+    Header --> IFD: ReadHeader
+    IFD --> Tag: ReadImageFileDirectory
+    Tag --> Value: ReadTag
+    Value --> Tag: all values read
+    Tag --> IFD: all tags read
+    IFD --> [*]: no more IFDs
 ```
-ImageFileDirectory: 14 tags.
-ImageWidth: { 150 }
-ImageLength: { 160 }
-BitsPerSample: { 8 8 8 }
-Compression: { NONE }
-PhotometricInterpretation: { RGB }
-StripOffsets: { 00000008 0000119C 00002330 000034C4 00004658 000057EC 00006980 00007B14 00008CA8 00009E3C 0000AFD0 0000C164 0000D2F8 0000E48C 0000F620 000107B4 }
-SamplesPerPixel: { 3 }
-RowsPerStrip: { 10 }
-StripByteCounts: { 4500 4500 4500 4500 4500 4500 4500 4500 4500 4500 4500 4500 4500 4500 4500 4500 }
-XResolution: { 300 }
-YResolution: { 300 }
-ResolutionUnit: { INCH }
-Software: { S A R A F F   S O F T W A R E }
-Copyright: { ( c )   S A R A F F   2 0 1 4 }
 
+Rules:
 
-Strip 0: 
+* `ReadValue()` must be called until it returns `null` before the next `ReadTag()`.
+* `ReadHandle()` is a value read too; after it returns `null` the tag is exhausted.
+* After all tags, `ReadTag()` returns `null` and advances to the next IFD offset.
+* Calling a method in the wrong state throws `InvalidOperationException`.
+* The reader does not recover from `TiffFormatException`; dispose it and start over.
 
-0000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
-0010: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
-...
+## Values
 
-Strip 1: 
+| TIFF type | `ReadValue()` result |
+|---|---|
+| `TIFF_BYTE` | `byte` |
+| `TIFF_ASCII` | `string` - the whole ASCII value, trimmed at the first NUL |
+| `TIFF_SHORT` | `ushort` |
+| `TIFF_LONG` | `uint` |
+| `TIFF_RATIONAL` | `TiffRational` |
+| `TIFF_SBYTE` | `sbyte` |
+| `TIFF_UNDEFINED` | `byte` |
+| `TIFF_SSHORT` | `short` |
+| `TIFF_SLONG` | `int` |
+| `TIFF_SRATIONAL` | `TiffRational` |
+| `TIFF_FLOAT` | `float` |
+| `TIFF_DOUBLE` | `double` |
+| `TIFF_IFD` | `uint` |
 
-0000: 11 00 00 11 00 00 11 00 00 11 00 00 11 00 00 11 
-0010: 00 00 11 00 00 11 00 00 11 00 00 11 00 00 11 00 
-...
+Known tags are converted to CLR enums. For example, `Compression` returns `TiffCompression`,
+`PhotometricInterpretation` returns `TiffPhotoMetric`, and `T6Options` returns
+`TiffGroup6Options`.
+
+> **ASCII is one value, not one character.** A single `ReadValue()` call consumes the whole
+> ASCII block and returns a `string`. The next call returns `null` and moves back to the tag
+> state. Use `Tag<string>` when writing; `Tag<char>` is still supported for byte-oriented data.
+
+## Metadata
+
+Every tag returned by `ReadTag()` also implements `ITagInfo`:
+
+| Property | Meaning |
+|---|---|
+| `TagId` | `TiffTags` value |
+| `DataType` | TIFF data type (`TiffDataType`) |
+| `ItemType` | CLR type of one value, e.g. `ushort`, `string`, `TiffRational`, `uint` |
+| `Count` | TIFF count: number of items; for ASCII, the number of bytes |
+
+Example:
+
+```csharp
+var info = (ITagInfo)tag!;
+Console.WriteLine($"{tag!.TagId}: type={info.DataType}, item={info.ItemType}, count={info.Count}");
 ```
-[Download File](./content/Home_1.txt)
+
+## Handles and raw data
+
+`ReadHandle()` converts the current value to a `TiffHandle` and validates that it is a
+non-negative 32-bit offset. A handle is a lightweight value; the reader does not own it.
+
+```csharp
+// stripByteCount comes from the paired StripByteCounts tag.
+TiffHandle? handle;
+while ((handle = reader.ReadHandle()) != null) {
+    var data = reader.ReadData(handle, stripByteCount);
+    // process raw strip bytes
+}
+```
+
+`ReadData` checks:
+
+* the handle is open;
+* the requested count is non-negative and fits into an `int`;
+* `handleOffset + count` is inside the stream.
+
+The sample image used on this site uses 16 strips. `ReadData` returns exactly the bytes of each
+strip; TIFF compression is not decoded.
+
+## Multi-page files
+
+```csharp
+reader.ReadHeader();
+
+for (var count = reader.ReadImageFileDirectory();
+     count != 0;
+     count = reader.ReadImageFileDirectory()) {
+
+    ITag? tag;
+    while ((tag = reader.ReadTag()) != null) {
+        while (reader.ReadValue() != null) { }
+    }
+}
+```
+
+`ReadImageFileDirectory()` follows the next-IFD offset automatically. A return value of `0`
+means there are no more directories (or the current directory has no tags; that is unusual in
+real files).
+
+## Options
+
+| Option | Default | Effect |
+|---|---:|---|
+| `LeaveOpen` | `true` | Do not dispose the source stream when the reader is disposed |
+| `MaxValueBytes` | 64 MiB | Maximum size of one buffered tag value |
+| `MaxPages` | 1,000,000 | Maximum number of IFDs in the chain |
+| `BaseOffset` | 0 | Absolute stream position of the TIFF header |
+
+The reader requires a **readable and seekable** stream. It seeks to `BaseOffset` when it is
+created.
+
+## Errors
+
+| Exception | When |
+|---|---|
+| `TiffFormatException` | Bad magic/version, truncated data, out-of-range offset, cyclic IFD, zero-count tag, unsupported type, limit exceeded |
+| `NotSupportedException` | BigTIFF (`version 43`) |
+| `InvalidOperationException` | Method called in the wrong state |
+| `ArgumentException` | Closed `TiffHandle` or invalid handle data |
+| `ArgumentOutOfRangeException` | Negative/invalid count or option |
+| `ObjectDisposedException` | Reader used after `Dispose()` |
+| `IOException` | Underlying stream failure |
+
+## Ownership and threading
+
+* The reader does not dispose the stream by default. Set `LeaveOpen = false` if the reader
+  should own it.
+* The reader does not dispose handles returned by `ReadHandle()`. `TiffHandle.Dispose()` only
+  marks a handle closed.
+* A `TiffReader` instance is not thread-safe. Create one reader per stream and serialize access.
+* The static type/tag caches are safe to use from multiple readers.
+
+## Performance notes
+
+The 2.x reader buffers each tag value once and parses from memory. In the included ShortRun
+benchmark on .NET 10, reading a 1000-tag directory took roughly 128 microseconds (the exact
+number depends on the machine). The key properties are:
+
+* one bounded block read per tag, not one stream call per value;
+* cached type and tag-to-enum mappings;
+* no reflection during normal value reads.
+
+See [Writer](./writer.md) for the write side and [Safety and limits](./safety.md) for the
+validation rules.
