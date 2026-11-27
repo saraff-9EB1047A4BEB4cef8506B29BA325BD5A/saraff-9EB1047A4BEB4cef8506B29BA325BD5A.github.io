@@ -12,7 +12,7 @@ Saraff.TwainX is the stream-based TWAIN 2.x component for `netstandard2.0`. It h
 - ## [Saraff.Twain.Extensions / Saraff.TwainX.Extensions]({% link sarafftwainext/index.md %})
 Saraff.Twain.NET Extensions (LINQ to TWAIN).
 - ## [Saraff.Twain.Aux](./sarafftwainaux/)
-Provides outproc interaction with a Saraff.Twain.NET.
+Out-of-process host for Saraff.Twain.NET over JSON-RPC 2.0: TWAIN/DSM isolation, STA threading, native/memory/TIFF/file transfers and service impersonation.
 
 # [Saraff.Twain.DS]({% link sarafftwainds/index.md %})
 Saraff.Twain.DS is the skillful class library which allows you to design drivers (a Data Source) of flatbed scanner, web and digital camera and any other TWAIN device from .NET environment. You can use this library in your programs written in any programming languages compatible with .NET technology.
