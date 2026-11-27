@@ -17,12 +17,16 @@ flowchart TB
     Reader --> BR["TiffBinaryReader<br/>seekable stream / value buffer"]
     Writer --> BW["TiffBinaryWriter<br/>seekable stream"]
 
+    Reader --> Codecs["Codec registries<br/>TiffCodecContext<br/>PackBits / LZW / Deflate"]
+    Writer --> Codecs
+
     Reader --> Types["TiffTypeTable"]
     Reader --> Tags["TiffTagRegistry"]
     Writer --> Types
 
     BR --> Stream["Seekable Stream"]
     BW --> Stream
+    Codecs --> Stream
     Stream --> Container["File / MemoryStream / embedded container"]
 ```
 
@@ -33,14 +37,18 @@ The public API never exposes the automaton or the binary primitives. It exposes 
 
 | Type | Responsibility |
 |---|---|
-| `TiffReader` | Header, IFD chain, tag iteration, typed values, `ReadData` for raw blocks |
-| `TiffWriter` | Header, raw data, IFD writing, multi-page chaining |
-| `TiffReaderOptions` | `LeaveOpen`, `MaxValueBytes`, `MaxPages`, `BaseOffset` |
-| `TiffWriterOptions` | `LeaveOpen`, `ByteOrder`, `MaxValueBytes`, `BaseOffset` |
+| `TiffReader` | Header, IFD chain, tag iteration, typed values, raw or decompressed data blocks |
+| `TiffWriter` | Header, raw or compressed data, IFD writing, multi-page chaining |
+| `TiffReaderOptions` | `LeaveOpen`, `MaxValueBytes`, `MaxDecodedBytes`, `MaxPages`, `BaseOffset`, `Codecs`, `ValueCodecs` |
+| `TiffWriterOptions` | `LeaveOpen`, `ByteOrder`, `MaxValueBytes`, `BaseOffset`, `Codecs`, `ValueCodecs` |
 | `Tag<T>` / `ITagValues` | Typed tag values for writing |
 | `ITagInfo` | Tag id, TIFF data type, CLR item type and count for reading |
 | `TiffHandle` | A relative offset to a TIFF location, used for strips/tiles/IFDs |
 | `TiffRational` | RATIONAL and SRATIONAL value |
+| `ITiffCompressionCodec` / `TiffCodecRegistry` | Pluggable compression and decompression |
+| `ITiffValueCodec` / `TiffValueCodecRegistry` | Pluggable custom TIFF data types |
+| `TiffCodecContext` | Byte order, tag values and decoded-size limit passed to a codec |
+| `TiffTagRegistry` | Extensible tag-to-enum mapping |
 | `TiffFormatException` | Malformed or unsafe TIFF data |
 
 ## Reader state machine
@@ -66,6 +74,8 @@ stateDiagram-v2
 * `ReadValue()` parses the buffer. ASCII returns `string`; RATIONAL/SRATIONAL return
   `TiffRational`; known tags are converted to CLR enums.
 * `ReadHandle()` is `ReadValue()` followed by offset conversion to `TiffHandle`.
+* `ReadData(handle, count)` returns raw bytes. The compression-aware overload resolves a codec,
+  decompresses the block, reverses the predictor if present and enforces `MaxDecodedBytes`.
 
 > **Important:** the automaton does not recover after an exception. A malformed file produces
 > `TiffFormatException` (or `NotSupportedException` for BigTIFF) and the reader should be
@@ -108,6 +118,30 @@ Key rules:
 * Delayed values are aligned to an even offset.
 * `WriteImageFileDirectory()` returns a handle to the **next-IFD field**. Pass it as the
   `owner` of the next page to build a chain.
+* `WriteData(byte[], compression, context)` compresses the block before writing it; the caller
+  must write matching `Compression` and predictor tags.
+
+## Codec layer
+
+Compression is a separate, optional layer around raw data blocks:
+
+```mermaid
+flowchart LR
+    Raw["Raw block"] --> Predict["Predictor encode<br/>optional"]
+    Predict --> Compress["ITiffCompressionCodec.Compress"]
+    Compress --> Encoded["Encoded bytes"]
+    Encoded --> Write["WriteData / StripOffsets"]
+
+    Read["ReadData / StripByteCounts"] --> Decoded["Encoded bytes"]
+    Decoded --> Decompress["ITiffCompressionCodec.Decompress"]
+    Decompress --> Unpredict["Predictor decode<br/>optional"]
+    Unpredict --> RawOut["Raw block"]
+```
+
+`TiffCodecRegistry` resolves the codec by `TiffCompression`. `TiffCodecContext` supplies the
+byte order and the tag values a codec may need (`Predictor`, `ImageWidth`, `BitsPerSample`,
+`SamplesPerPixel`, `PlanarConfiguration`, `TileWidth`). Registries are thread-safe; codec
+instances should be stateless or keep state per call. See [Codecs](./codecs.md).
 
 ## Offset patching
 
@@ -145,13 +179,16 @@ With `BaseOffset = 0` the behavior is the classic "TIFF starts at byte 0" case.
 
 | Component | Purpose |
 |---|---|
-| `TiffTypeTable` | Maps `TiffDataType` to size and CLR type, and CLR type to TIFF data type |
-| `TiffTagRegistry` | Maps known tag ids to their CLR enums; built once and cached |
+| `TiffTypeTable` | Maps `TiffDataType` to size and CLR type, and CLR type to TIFF data type; consults value codecs for custom types |
+| `TiffTagRegistry` | Maps known tag ids to their CLR enums; built once, cached and extensible at runtime |
+| `TiffCodecRegistry` | Maps `TiffCompression` to `ITiffCompressionCodec`; built-in and custom codecs |
+| `TiffValueCodecRegistry` | Maps custom `TiffDataType` values to `ITiffValueCodec` |
 | `TiffBinaryReader` | Explicit little/big-endian primitives, bounds checks, value buffer mode |
 | `TiffBinaryWriter` | Explicit little/big-endian primitives, relative offsets, patching |
 
-The registry is built from the assembly's tag attributes on first use. It is not rebuilt for
-every value, which removes the reflection cost of the 1.x reader.
+The tag registry is built from the assembly's tag attributes on first use and can be extended
+with `TiffTagRegistry.Register`. Codec registries use copy-on-write snapshots, so lookups do not
+lock and custom registrations do not affect registries already captured by a reader or writer.
 
 ## Release pipeline
 
@@ -174,3 +211,4 @@ The package and assembly versions are verified before any push. See
 * [TIFF data model](./data-model.md) - header, IFD and entry layout.
 * [Reader](./reader.md) - practical reading recipes.
 * [Writer](./writer.md) - practical writing recipes.
+* [Codecs](./codecs.md) - compression, predictors and extension points.

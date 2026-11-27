@@ -4,6 +4,7 @@
 `TiffWriter` writes classic TIFF files in the order the format expects: header, raw data,
 IFD entries and delayed value blocks. It validates the tag set, sorts entries by tag id,
 writes small values inline, writes larger values out-of-line and patches every offset.
+Data blocks can be written raw or compressed with a registered codec.
 
 ## Writing pipeline
 
@@ -49,7 +50,6 @@ using var writer = TiffWriter.Create(stream, new TiffWriterOptions {
     ByteOrder = TiffByteOrder.LittleEndian,
     MaxValueBytes = 64 * 1024 * 1024
 });
-
 var owner = writer.WriteHeader(); // header must be at relative position 0
 
 var strips = new TiffHandle[stripCount];
@@ -124,6 +124,51 @@ flowchart LR
 
 Each call to `WriteImageFileDirectory` patches the previous owner with the new IFD offset.
 The returned handle always points to the **next-IFD field** of the directory just written.
+
+## Compressed blocks
+
+`WriteData(byte[])` writes pre-compressed or uncompressed bytes. To compress a block, use the
+codec-aware overload and write the matching `Compression` tag. `StripByteCounts` must contain
+the compressed length:
+
+```csharp
+using System.Collections.Generic;
+using Saraff.Tiff.Core;
+
+var context = new TiffCodecContext(TiffByteOrder.LittleEndian,
+    new Dictionary<TiffTags, object> {
+        [TiffTags.ImageWidth] = width,
+        [TiffTags.BitsPerSample] = new[] { 8, 8, 8 },
+        [TiffTags.SamplesPerPixel] = 3,
+        [TiffTags.PlanarConfiguration] = 1,
+        [TiffTags.Predictor] = 2
+    });
+
+var header = writer.WriteHeader();
+var dataOffset = stream.Position;
+var strip = writer.WriteData(pixelBytes, TiffCompression.LZW, context);
+var compressedLength = (int)(stream.Position - dataOffset);
+
+var tags = new Collection<ITag> {
+    Tag<ushort>.Create(TiffTags.ImageWidth, (ushort)width),
+    Tag<ushort>.Create(TiffTags.ImageLength, (ushort)height),
+    Tag<ushort>.Create(TiffTags.BitsPerSample, 8, 8, 8),
+    Tag<TiffCompression>.Create(TiffTags.Compression, TiffCompression.LZW),
+    Tag<TiffHandle>.Create(TiffTags.StripOffsets, strip),
+    Tag<ushort>.Create(TiffTags.SamplesPerPixel, 3),
+    Tag<ushort>.Create(TiffTags.RowsPerStrip, (ushort)height),
+    Tag<uint>.Create(TiffTags.StripByteCounts, (uint)compressedLength),
+    Tag<ushort>.Create(TiffTags.Predictor, 2)
+};
+```
+
+The writer does not change `Compression` or `Predictor` tags automatically. If you pass a
+predictor in the context, write the same predictor value in the directory. See
+[Codecs](./codecs.md) for built-in codecs, predictor requirements and custom registries.
+
+The writer exposes `Codecs` and `ValueCodecs` for the registries used by the instance, plus
+`ByteOrder`. Custom value codecs for non-standard TIFF data types can be supplied through
+`TiffWriterOptions.ValueCodecs`.
 
 ## Inline and out-of-line values
 
@@ -211,9 +256,9 @@ the reader auto-detects the order. Inline values are still written at the beginn
 
 | Exception | Typical cause |
 |---|---|
-| `ArgumentException` | Invalid tag set, duplicate tag, empty values, bad data type |
-| `InvalidOperationException` | `WriteHeader()` not at relative position 0 |
-| `NotSupportedException` | Data beyond 4 GiB |
+| `ArgumentException` | Invalid tag set, duplicate tag, empty values, bad data type, missing predictor tags |
+| `InvalidOperationException` | `WriteHeader()` not at relative position 0, or a codec returned `null` |
+| `NotSupportedException` | Data beyond 4 GiB, no codec for the compression, floating-point predictor |
 | `ArgumentNullException` | Null stream, options, tags or data |
 | `ObjectDisposedException` | Writer used after `Dispose()` |
 | `IOException` | Underlying stream failure |
@@ -233,4 +278,4 @@ The original sample image created by the writer:
 
 [Download the sample TIFF file](./content/Home_test.tif)
 
-Next: [Reader](./reader.md) and [Safety and limits](./safety.md).
+Next: [Reader](./reader.md), [Codecs](./codecs.md) and [Safety and limits](./safety.md).

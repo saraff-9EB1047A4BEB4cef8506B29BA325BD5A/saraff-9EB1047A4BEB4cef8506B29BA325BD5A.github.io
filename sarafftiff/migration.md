@@ -1,5 +1,64 @@
 [All products](../) / [Saraff.Tiff.NET](./index.md)
-# Migration to 2.0
+# Migration
+
+## Migrating from 2.0 to 2.1
+
+Version 2.1 is additive for existing 2.0 code. Raw `ReadData`/`WriteData` calls keep their
+behavior; compression is opt-in through new overloads and registries.
+
+| Area | 2.0 | 2.1 |
+|---|---|---|
+| Package/assembly version | package `2.0.0`, assembly `2.0.0.0` | package `2.1.0`, assembly `2.1.0.0` |
+| Compression | not implemented | PackBits, LZW, zlib-wrapped Deflate, `NONE` |
+| Predictor | n/a | integer horizontal predictor (`Predictor = 2`) |
+| Custom codecs | not possible | `ITiffCompressionCodec`, `ITiffValueCodec` |
+| Custom tag enums | internal registry | public `TiffTagAttribute` and `TiffTagRegistry` |
+| Decoded data limit | n/a | `TiffReaderOptions.MaxDecodedBytes` |
+| Reader/writer properties | `TiffVersion` | also `ByteOrder`, `Codecs`, `ValueCodecs` |
+
+### Registries are explicit
+
+`new TiffCodecRegistry()` now contains the built-in codecs. If 2.0-era code relied on a new
+registry being empty, use `TiffCodecRegistry.CreateEmpty()` and register only what is needed.
+`TiffCodecRegistry.Default` is process-wide and mutable; per-reader/per-writer registries are
+available through options.
+
+```csharp
+var registry = TiffCodecRegistry.CreateEmpty();
+registry.Register(new MyCodec());
+
+using var reader = TiffReader.Create(stream, new TiffReaderOptions {
+    Codecs = registry,
+    MaxDecodedBytes = 64 * 1024 * 1024
+});
+```
+
+### Raw vs compressed blocks
+
+The existing overloads are unchanged:
+
+```csharp
+var raw = reader.ReadData(handle, byteCount);
+var handle = writer.WriteData(raw);
+```
+
+Use the codec-aware overloads for compressed strips and tiles. The count is the compressed
+byte count:
+
+```csharp
+var context = new TiffCodecContext(reader.ByteOrder, tagValues);
+var pixels = reader.ReadData(handle, compressedByteCount, TiffCompression.LZW, context);
+```
+
+See [Codecs](./codecs.md) for required predictor tags, built-in codecs and custom registration.
+
+### Still not implemented
+
+JPEG/OJPEG, JPEG2000, JBIG, CCITT RLE/Group 3/Group 4 and the floating-point predictor
+(`Predictor = 3`) remain outside the built-in set. Unsupported compression throws
+`NotSupportedException` unless a codec is registered.
+
+## Migrating from 1.x to 2.0
 
 Version 2.0 is a major update. The low-level model is the same, but value semantics, ownership,
 target frameworks and the public contracts around tags changed.
@@ -30,7 +89,7 @@ The broken .NET 2.0 project was removed. Use the package from `netstandard2.0` o
 or the `net48` asset on .NET Framework 4.8.
 
 ```xml
-<PackageReference Include="Saraff.Tiff" Version="2.0.0" />
+<PackageReference Include="Saraff.Tiff" Version="2.1.0" />
 ```
 
 ## 2. Update the reader loop
@@ -207,10 +266,13 @@ The writer supports the same option; the header must be written at
 
 ## 9. Namespace notes
 
-The namespaces did not change:
+The namespaces did not change in 2.0:
 
 * `Saraff.Tiff` - readers, writers, tags, handles, options, exceptions;
 * `Saraff.Tiff.Core` - `TiffTags`, `TiffDataType` and tag enums.
+
+Version 2.1 adds `Saraff.Tiff.Compression` for built-in codecs; codec interfaces and registries
+remain in `Saraff.Tiff.Core`.
 
 `TiffDataType` is now public, so consumers can inspect `ITagInfo.DataType` without reflection.
 
@@ -226,6 +288,9 @@ The namespaces did not change:
 - [ ] Set `MaxValueBytes` and `MaxPages` for untrusted uploads.
 - [ ] Use `BaseOffset` for embedded TIFF instead of manual seeks.
 - [ ] Re-test against big-endian and truncated files.
+- [ ] Set `MaxDecodedBytes` when decoding untrusted compressed blocks.
+- [ ] Replace `new TiffCodecRegistry()` used as an empty registry with `CreateEmpty()`.
+- [ ] Register custom compression, value or tag codecs explicitly.
 
 See [Safety and limits](./safety.md) for validation details and [Architecture](./architecture.md)
 for the new internal pipeline.

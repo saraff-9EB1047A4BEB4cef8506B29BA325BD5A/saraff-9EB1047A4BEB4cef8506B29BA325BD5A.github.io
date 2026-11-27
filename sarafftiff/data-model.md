@@ -116,6 +116,10 @@ and does not require alignment.
 Known tags are additionally converted to CLR enums by `TiffTagRegistry` (for example
 `Compression` becomes `TiffCompression`, `T6Options` becomes `TiffGroup6Options`).
 
+The data model describes the encoded structure only. Compression and the `Predictor` tag are
+applied to strip/tile blocks, not to the tag values themselves. See [Codecs](./codecs.md) for
+the block pipeline and custom TIFF data types.
+
 ## CLR type mapping for `Tag<T>`
 
 | `T` | TIFF type | Notes |

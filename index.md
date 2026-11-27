@@ -26,7 +26,7 @@ Saraff.IoC is a lightweight, thread-safe dependency injection container for .NET
 # [Saraff.AxHost.NET](./saraffaxhost/index.md)
 Saraff.AxHost.NET Provides hosting for custom components (.NET) in applications with unmanaged code.
 # [Saraff.Tiff.NET](./sarafftiff/index.md)
-Saraff.Tiff.NET is a dependency-free, low-level classic TIFF reader and writer for .NET (`netstandard2.0`, `net48`, `net10.0`). It supports little- and big-endian files, embedded TIFF via `BaseOffset`, bounded parsing for untrusted input, multi-page IFDs and NuGet trusted publishing. It does not implement compression codecs or pixel conversion.
+Saraff.Tiff.NET is a dependency-free, low-level classic TIFF reader and writer for .NET (`netstandard2.0`, `net48`, `net10.0`). It supports little- and big-endian files, embedded TIFF via `BaseOffset`, bounded parsing for untrusted input, multi-page IFDs, built-in PackBits/LZW/Deflate codecs, pluggable compression and value codecs, and NuGet trusted publishing. It does not perform pixel decoding or color conversion.
 # [Saraff.ThreadingModel.NET](./saraffthread/)
 Saraff.ThreadingModel.NET is a single-threaded execution model for .NET: an STA dispatcher with a Win32 message pump, an interface proxy that marshals every call to that thread, and a DI-friendly message queue (`net462` and `net8.0-windows`).
 # [Saraff.VisualFoxpro.NET](./saraffvfp/)

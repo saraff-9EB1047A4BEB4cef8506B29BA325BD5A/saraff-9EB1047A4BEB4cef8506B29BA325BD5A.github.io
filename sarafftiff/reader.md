@@ -3,7 +3,8 @@
 
 `TiffReader` gives forward-only, non-cached access to classic TIFF data. It reads the header,
 then IFDs, then tags and values in a strict order. Tag values are buffered in one bounded block
-per tag; pixel data is read separately through `ReadData`.
+per tag; pixel data is read separately through `ReadData`. Blocks can be returned raw or
+decompressed with a registered codec.
 
 ## Reading lifecycle
 
@@ -28,6 +29,8 @@ sequenceDiagram
     R-->>App: typed value or null
     App->>R: ReadData(handle, count)
     R->>BR: seek, read raw bytes, restore position
+    App->>R: ReadData(handle, count, compression, context)
+    R->>R: resolve codec, decompress, reverse predictor
 ```
 
 ## Quick start
@@ -43,6 +46,7 @@ using var stream = File.OpenRead("sample.tif");
 using var reader = TiffReader.Create(stream, new TiffReaderOptions {
     LeaveOpen = true,
     MaxValueBytes = 64 * 1024 * 1024,
+    MaxDecodedBytes = 256 * 1024 * 1024,
     MaxPages = 1000,
     BaseOffset = 0
 });
@@ -135,7 +139,8 @@ Rules:
 
 Known tags are converted to CLR enums. For example, `Compression` returns `TiffCompression`,
 `PhotometricInterpretation` returns `TiffPhotoMetric`, and `T6Options` returns
-`TiffGroup6Options`.
+`TiffGroup6Options`. Custom TIFF data types can be decoded through `ITiffValueCodec`; see
+[Codecs](./codecs.md).
 
 > **ASCII is one value, not one character.** A single `ReadValue()` call consumes the whole
 > ASCII block and returns a `string`. The next call returns `null` and moves back to the tag
@@ -179,8 +184,38 @@ while ((handle = reader.ReadHandle()) != null) {
 * the requested count is non-negative and fits into an `int`;
 * `handleOffset + count` is inside the stream.
 
-The sample image used on this site uses 16 strips. `ReadData` returns exactly the bytes of each
-strip; TIFF compression is not decoded.
+The codec-aware overload additionally validates the compressed stream, resolves the codec and
+bounds the decoded result by `MaxDecodedBytes`. The sample image used on this site uses 16
+strips. `ReadData(handle, count)` returns exactly the raw bytes of each strip; it does not
+decompress. Use the codec-aware overload when the `Compression` tag is not `NONE`.
+
+## Decoding compressed blocks
+
+The codec-aware overload resolves the codec from `TiffReaderOptions.Codecs` (the built-in
+registry by default) and passes `TiffCodecContext` to it. `count` is the **compressed** byte
+count from `StripByteCounts` or `TileByteCounts`, not the decoded size.
+
+```csharp
+using System.Collections.Generic;
+using Saraff.Tiff.Core;
+
+var tagValues = new Dictionary<TiffTags, object> {
+    [TiffTags.ImageWidth] = width,
+    [TiffTags.ImageLength] = height,
+    [TiffTags.BitsPerSample] = new[] { 8, 8, 8 },
+    [TiffTags.SamplesPerPixel] = 3,
+    [TiffTags.PlanarConfiguration] = 1,
+    [TiffTags.Predictor] = 2
+};
+
+var context = new TiffCodecContext(reader.ByteOrder, tagValues);
+var pixels = reader.ReadData(handle, compressedByteCount, TiffCompression.LZW, context);
+```
+
+Built-in codecs are PackBits, LZW, Deflate and `NONE`. A missing codec throws
+`NotSupportedException`; malformed compressed data throws `TiffFormatException`; the decoded
+result is bounded by `TiffReaderOptions.MaxDecodedBytes`. See [Codecs](./codecs.md) for the
+full codec model and custom registries.
 
 ## Multi-page files
 
@@ -208,8 +243,11 @@ real files).
 |---|---:|---|
 | `LeaveOpen` | `true` | Do not dispose the source stream when the reader is disposed |
 | `MaxValueBytes` | 64 MiB | Maximum size of one buffered tag value |
+| `MaxDecodedBytes` | 256 MiB | Maximum decoded block size; `0` disables the limit |
 | `MaxPages` | 1,000,000 | Maximum number of IFDs in the chain |
 | `BaseOffset` | 0 | Absolute stream position of the TIFF header |
+| `Codecs` | `TiffCodecRegistry.Default` | Compression codecs used by `ReadData` |
+| `ValueCodecs` | `TiffValueCodecRegistry.Default` | Value codecs for custom TIFF data types |
 
 The reader requires a **readable and seekable** stream. It seeks to `BaseOffset` when it is
 created.
@@ -218,10 +256,10 @@ created.
 
 | Exception | When |
 |---|---|
-| `TiffFormatException` | Bad magic/version, truncated data, out-of-range offset, cyclic IFD, zero-count tag, unsupported type, limit exceeded |
-| `NotSupportedException` | BigTIFF (`version 43`) |
-| `InvalidOperationException` | Method called in the wrong state |
-| `ArgumentException` | Closed `TiffHandle` or invalid handle data |
+| `TiffFormatException` | Bad magic/version, truncated data, out-of-range offset, cyclic IFD, zero-count tag, unsupported type, limit exceeded, invalid compressed data |
+| `NotSupportedException` | BigTIFF (`version 43`), no codec for the compression, floating-point predictor |
+| `InvalidOperationException` | Method called in the wrong state, or a codec returned `null` |
+| `ArgumentException` | Closed `TiffHandle`, invalid handle data, missing predictor tags |
 | `ArgumentOutOfRangeException` | Negative/invalid count or option |
 | `ObjectDisposedException` | Reader used after `Dispose()` |
 | `IOException` | Underlying stream failure |
@@ -233,7 +271,8 @@ created.
 * The reader does not dispose handles returned by `ReadHandle()`. `TiffHandle.Dispose()` only
   marks a handle closed.
 * A `TiffReader` instance is not thread-safe. Create one reader per stream and serialize access.
-* The static type/tag caches are safe to use from multiple readers.
+* The static type/tag caches and codec registries are safe to use from multiple readers.
+* A codec instance may be shared between readers; it must be stateless or keep state per call.
 
 ## Performance notes
 
@@ -243,7 +282,8 @@ number depends on the machine). The key properties are:
 
 * one bounded block read per tag, not one stream call per value;
 * cached type and tag-to-enum mappings;
-* no reflection during normal value reads.
+* no reflection during normal value reads;
+* compression is performed only when the codec-aware overload is used.
 
-See [Writer](./writer.md) for the write side and [Safety and limits](./safety.md) for the
-validation rules.
+See [Writer](./writer.md) for the write side, [Codecs](./codecs.md) for compression and
+[Safety and limits](./safety.md) for the validation rules.
